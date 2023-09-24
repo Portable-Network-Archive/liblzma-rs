@@ -18,14 +18,14 @@ so you can migrate simply.
 
 ## Migrate from lzma-sys
 
-```toml
+```diff
 # Cargo.toml
 [dependencies]
 -lzma-sys = "0.1.20"
 +liblzma-sys = "0.1.20"
 ```
 
-```rust
+```diff
 // *.rs
 -use lzma_sys;
 +use liblzma_sys;
