@@ -18,7 +18,7 @@ edition = "2018"
 members = ["systest"]
 
 [dependencies]
-liblzma-sys = { path = "liblzma-sys", version = "0.1.20" }
+liblzma-sys = { path = "liblzma-sys", version = "0.1.20", default-features = false }
 tokio-io = { version = "0.1.12", optional = true }
 futures = { version = "0.1.26", optional = true }
 
@@ -28,6 +28,7 @@ quickcheck = "1.0.1"
 tokio-core = "0.1.17"
 
 [features]
+default = ["threading"]
 tokio = ["tokio-io", "futures"]
 static = ["liblzma-sys/static"]
 threading = ["liblzma-sys/threading"]
