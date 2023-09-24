@@ -18,7 +18,7 @@ categories = ["external-ffi-bindings"]
 edition = "2018"
 
 [dependencies]
-libc = "0.2.51"
+libc = "0.2.67"
 
 [build-dependencies]
 cc = { version = "1.0.34", features = ["parallel"] }
