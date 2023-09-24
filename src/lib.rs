@@ -9,8 +9,8 @@
 //! # Examples
 //!
 //! ```
+//! use liblzma::read::{XzDecoder, XzEncoder};
 //! use std::io::prelude::*;
-//! use liblzma::read::{XzEncoder, XzDecoder};
 //!
 //! // Round trip some bytes from a byte source, into a compressor, into a
 //! // decompressor, and finally into a vector.
