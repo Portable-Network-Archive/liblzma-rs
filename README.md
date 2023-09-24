@@ -16,14 +16,14 @@ so you can migrate simply.
 
 ## Migrate from xz2
 
-```toml
+```diff
 # Cargo.toml
 [dependencies]
 -xz2 = "0.1.7"
 +liblzma = "0.1.7"
 ```
 
-```rust
+```diff
 // *.rs
 -use xz2;
 +use liblzma;
