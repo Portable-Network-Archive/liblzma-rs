@@ -599,7 +599,7 @@ impl Filters {
         Filters {
             inner: vec![liblzma_sys::lzma_filter {
                 id: liblzma_sys::LZMA_VLI_UNKNOWN,
-                options: 0 as *mut _,
+                options: std::ptr::null_mut(),
             }],
             lzma_opts: LinkedList::new(),
         }
@@ -644,7 +644,7 @@ impl Filters {
     pub fn x86(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_X86,
-            options: 0 as *mut _,
+            options: std::ptr::null_mut(),
         })
     }
 
@@ -652,7 +652,7 @@ impl Filters {
     pub fn powerpc(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_POWERPC,
-            options: 0 as *mut _,
+            options: std::ptr::null_mut(),
         })
     }
 
@@ -660,7 +660,7 @@ impl Filters {
     pub fn ia64(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_IA64,
-            options: 0 as *mut _,
+            options: std::ptr::null_mut(),
         })
     }
 
@@ -668,7 +668,7 @@ impl Filters {
     pub fn arm(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_ARM,
-            options: 0 as *mut _,
+            options: std::ptr::null_mut(),
         })
     }
 
@@ -676,7 +676,7 @@ impl Filters {
     pub fn arm_thumb(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
-            options: 0 as *mut _,
+            options: std::ptr::null_mut(),
         })
     }
 
@@ -684,7 +684,7 @@ impl Filters {
     pub fn sparc(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_SPARC,
-            options: 0 as *mut _,
+            options: std::ptr::null_mut(),
         })
     }
 
