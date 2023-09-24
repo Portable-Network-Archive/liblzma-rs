@@ -25,5 +25,6 @@ cc = { version = "1.0.34", features = ["parallel"] }
 pkg-config = "0.3.14"
 
 [features]
+default = ["threading"]
 static = []
 threading = []
