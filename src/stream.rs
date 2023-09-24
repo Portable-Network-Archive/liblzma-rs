@@ -403,7 +403,7 @@ impl Stream {
         unsafe {
             let before = self.total_out();
             let ret = {
-                let ptr = output.as_mut_ptr().offset(len as isize);
+                let ptr = output.as_mut_ptr().add(len);
                 let out = slice::from_raw_parts_mut(ptr, cap - len);
                 self.process(input, out, action)
             };
