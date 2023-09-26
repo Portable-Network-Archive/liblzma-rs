@@ -32,6 +32,7 @@ default = ["threading"]
 tokio = ["tokio-io", "futures"]
 static = ["liblzma-sys/static"]
 threading = ["liblzma-sys/threading"]
+bindgen = ["liblzma-sys/bindgen"]
 
 [package.metadata.docs.rs]
 features = ["tokio-io", "futures"]
