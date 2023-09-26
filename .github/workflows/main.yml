@@ -59,8 +59,14 @@ jobs:
     - run: cargo clean
     - run: cargo test --features threading
     - run: cargo clean
+    - run: cargo test --features bindgen
+    - run: cargo clean
     - run: cargo test --features tokio threading
+    - run: cargo clean
+    - run: cargo test --all-features
     - run: cargo run --manifest-path systest/Cargo.toml
+      if: matrix.static == 'yes'
+    - run: cargo run --manifest-path systest/Cargo.toml --features bindgen
       if: matrix.static == 'yes'
 
 
