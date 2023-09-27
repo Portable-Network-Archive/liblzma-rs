@@ -461,6 +461,14 @@ pub const LZMA_STREAM_HEADER_SIZE: u32 = 12;
 pub const LZMA_BACKWARD_SIZE_MIN: u32 = 4;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: u32 = 1024;
+
+#[cfg(target_env = "msvc")]
+#[doc(hidden)]
+pub type __enum_ty = ::std::os::raw::c_int;
+#[cfg(not(target_env = "msvc"))]
+#[doc(hidden)]
+pub type __enum_ty = ::std::os::raw::c_uint;
+
 pub type wchar_t = ::std::os::raw::c_int;
 pub type max_align_t = u128;
 pub type __int8_t = ::std::os::raw::c_schar;
@@ -1114,7 +1122,7 @@ extern "C" {
 }
 pub type lzma_bool = ::std::os::raw::c_uchar;
 pub const lzma_reserved_enum_LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-pub type lzma_reserved_enum = ::std::os::raw::c_uint;
+pub type lzma_reserved_enum = __enum_ty;
 pub const lzma_ret_LZMA_OK: lzma_ret = 0;
 pub const lzma_ret_LZMA_STREAM_END: lzma_ret = 1;
 pub const lzma_ret_LZMA_NO_CHECK: lzma_ret = 2;
@@ -1127,13 +1135,13 @@ pub const lzma_ret_LZMA_OPTIONS_ERROR: lzma_ret = 8;
 pub const lzma_ret_LZMA_DATA_ERROR: lzma_ret = 9;
 pub const lzma_ret_LZMA_BUF_ERROR: lzma_ret = 10;
 pub const lzma_ret_LZMA_PROG_ERROR: lzma_ret = 11;
-pub type lzma_ret = ::std::os::raw::c_uint;
+pub type lzma_ret = __enum_ty;
 pub const lzma_action_LZMA_RUN: lzma_action = 0;
 pub const lzma_action_LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const lzma_action_LZMA_FULL_FLUSH: lzma_action = 2;
 pub const lzma_action_LZMA_FULL_BARRIER: lzma_action = 4;
 pub const lzma_action_LZMA_FINISH: lzma_action = 3;
-pub type lzma_action = ::std::os::raw::c_uint;
+pub type lzma_action = __enum_ty;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct lzma_allocator {
@@ -1461,7 +1469,7 @@ pub const lzma_check_LZMA_CHECK_NONE: lzma_check = 0;
 pub const lzma_check_LZMA_CHECK_CRC32: lzma_check = 1;
 pub const lzma_check_LZMA_CHECK_CRC64: lzma_check = 4;
 pub const lzma_check_LZMA_CHECK_SHA256: lzma_check = 10;
-pub type lzma_check = ::std::os::raw::c_uint;
+pub type lzma_check = __enum_ty;
 extern "C" {
     pub fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
 }
@@ -1747,13 +1755,13 @@ pub const lzma_match_finder_LZMA_MF_HC4: lzma_match_finder = 4;
 pub const lzma_match_finder_LZMA_MF_BT2: lzma_match_finder = 18;
 pub const lzma_match_finder_LZMA_MF_BT3: lzma_match_finder = 19;
 pub const lzma_match_finder_LZMA_MF_BT4: lzma_match_finder = 20;
-pub type lzma_match_finder = ::std::os::raw::c_uint;
+pub type lzma_match_finder = __enum_ty;
 extern "C" {
     pub fn lzma_mf_is_supported(match_finder: lzma_match_finder) -> lzma_bool;
 }
 pub const lzma_mode_LZMA_MODE_FAST: lzma_mode = 1;
 pub const lzma_mode_LZMA_MODE_NORMAL: lzma_mode = 2;
-pub type lzma_mode = ::std::os::raw::c_uint;
+pub type lzma_mode = __enum_ty;
 extern "C" {
     pub fn lzma_mode_is_supported(mode: lzma_mode) -> lzma_bool;
 }
