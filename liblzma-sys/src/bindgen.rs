@@ -435,8 +435,8 @@ pub const SIG_ATOMIC_MIN: i32 = -2147483648;
 pub const SIG_ATOMIC_MAX: u32 = 2147483647;
 pub const LZMA_H_INTERNAL: u32 = 1;
 pub const LZMA_VERSION_MAJOR: u32 = 5;
-pub const LZMA_VERSION_MINOR: u32 = 2;
-pub const LZMA_VERSION_PATCH: u32 = 10;
+pub const LZMA_VERSION_MINOR: u32 = 4;
+pub const LZMA_VERSION_PATCH: u32 = 4;
 pub const LZMA_VERSION_COMMIT: &[u8; 1] = b"\0";
 pub const LZMA_VERSION_STABILITY_ALPHA: u32 = 0;
 pub const LZMA_VERSION_STABILITY_BETA: u32 = 1;
@@ -458,7 +458,6 @@ pub const LZMA_PB_MIN: u32 = 0;
 pub const LZMA_PB_MAX: u32 = 4;
 pub const LZMA_PB_DEFAULT: u32 = 2;
 pub const LZMA_STREAM_HEADER_SIZE: u32 = 12;
-pub const LZMA_BACKWARD_SIZE_MIN: u32 = 4;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: u32 = 1024;
 
@@ -1135,6 +1134,15 @@ pub const lzma_ret_LZMA_OPTIONS_ERROR: lzma_ret = 8;
 pub const lzma_ret_LZMA_DATA_ERROR: lzma_ret = 9;
 pub const lzma_ret_LZMA_BUF_ERROR: lzma_ret = 10;
 pub const lzma_ret_LZMA_PROG_ERROR: lzma_ret = 11;
+pub const lzma_ret_LZMA_SEEK_NEEDED: lzma_ret = 12;
+pub const lzma_ret_LZMA_RET_INTERNAL1: lzma_ret = 101;
+pub const lzma_ret_LZMA_RET_INTERNAL2: lzma_ret = 102;
+pub const lzma_ret_LZMA_RET_INTERNAL3: lzma_ret = 103;
+pub const lzma_ret_LZMA_RET_INTERNAL4: lzma_ret = 104;
+pub const lzma_ret_LZMA_RET_INTERNAL5: lzma_ret = 105;
+pub const lzma_ret_LZMA_RET_INTERNAL6: lzma_ret = 106;
+pub const lzma_ret_LZMA_RET_INTERNAL7: lzma_ret = 107;
+pub const lzma_ret_LZMA_RET_INTERNAL8: lzma_ret = 108;
 pub type lzma_ret = __enum_ty;
 pub const lzma_action_LZMA_RUN: lzma_action = 0;
 pub const lzma_action_LZMA_SYNC_FLUSH: lzma_action = 1;
@@ -1223,7 +1231,7 @@ pub struct lzma_stream {
     pub reserved_ptr2: *mut ::std::os::raw::c_void,
     pub reserved_ptr3: *mut ::std::os::raw::c_void,
     pub reserved_ptr4: *mut ::std::os::raw::c_void,
-    pub reserved_int1: u64,
+    pub seek_pos: u64,
     pub reserved_int2: u64,
     pub reserved_int3: usize,
     pub reserved_int4: usize,
@@ -1365,13 +1373,13 @@ fn bindgen_test_layout_lzma_stream() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reserved_int1) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).seek_pos) as usize - ptr as usize },
         96usize,
         concat!(
             "Offset of field: ",
             stringify!(lzma_stream),
             "::",
-            stringify!(reserved_int1)
+            stringify!(seek_pos)
         )
     );
     assert_eq!(
@@ -1540,6 +1548,9 @@ extern "C" {
     ) -> lzma_ret;
 }
 extern "C" {
+    pub fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
+}
+extern "C" {
     pub fn lzma_raw_encoder_memusage(filters: *const lzma_filter) -> u64;
 }
 extern "C" {
@@ -1609,6 +1620,31 @@ extern "C" {
         in_: *const u8,
         in_pos: *mut usize,
         in_size: usize,
+    ) -> lzma_ret;
+}
+extern "C" {
+    pub fn lzma_str_to_filters(
+        str_: *const ::std::os::raw::c_char,
+        error_pos: *mut ::std::os::raw::c_int,
+        filters: *mut lzma_filter,
+        flags: u32,
+        allocator: *const lzma_allocator,
+    ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn lzma_str_from_filters(
+        str_: *mut *mut ::std::os::raw::c_char,
+        filters: *const lzma_filter,
+        flags: u32,
+        allocator: *const lzma_allocator,
+    ) -> lzma_ret;
+}
+extern "C" {
+    pub fn lzma_str_list_filters(
+        str_: *mut *mut ::std::os::raw::c_char,
+        filter_id: lzma_vli,
+        flags: u32,
+        allocator: *const lzma_allocator,
     ) -> lzma_ret;
 }
 #[repr(C)]
@@ -1778,9 +1814,9 @@ pub struct lzma_options_lzma {
     pub nice_len: u32,
     pub mf: lzma_match_finder,
     pub depth: u32,
-    pub reserved_int1: u32,
-    pub reserved_int2: u32,
-    pub reserved_int3: u32,
+    pub ext_flags: u32,
+    pub ext_size_low: u32,
+    pub ext_size_high: u32,
     pub reserved_int4: u32,
     pub reserved_int5: u32,
     pub reserved_int6: u32,
@@ -1908,33 +1944,33 @@ fn bindgen_test_layout_lzma_options_lzma() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reserved_int1) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).ext_flags) as usize - ptr as usize },
         48usize,
         concat!(
             "Offset of field: ",
             stringify!(lzma_options_lzma),
             "::",
-            stringify!(reserved_int1)
+            stringify!(ext_flags)
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reserved_int2) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).ext_size_low) as usize - ptr as usize },
         52usize,
         concat!(
             "Offset of field: ",
             stringify!(lzma_options_lzma),
             "::",
-            stringify!(reserved_int2)
+            stringify!(ext_size_low)
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reserved_int3) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).ext_size_high) as usize - ptr as usize },
         56usize,
         concat!(
             "Offset of field: ",
             stringify!(lzma_options_lzma),
             "::",
-            stringify!(reserved_int3)
+            stringify!(ext_size_high)
         )
     );
     assert_eq!(
@@ -2068,8 +2104,8 @@ pub struct lzma_mt {
     pub reserved_int2: u32,
     pub reserved_int3: u32,
     pub reserved_int4: u32,
-    pub reserved_int5: u64,
-    pub reserved_int6: u64,
+    pub memlimit_threading: u64,
+    pub memlimit_stop: u64,
     pub reserved_int7: u64,
     pub reserved_int8: u64,
     pub reserved_ptr1: *mut ::std::os::raw::c_void,
@@ -2232,23 +2268,23 @@ fn bindgen_test_layout_lzma_mt() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reserved_int5) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).memlimit_threading) as usize - ptr as usize },
         64usize,
         concat!(
             "Offset of field: ",
             stringify!(lzma_mt),
             "::",
-            stringify!(reserved_int5)
+            stringify!(memlimit_threading)
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).reserved_int6) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).memlimit_stop) as usize - ptr as usize },
         72usize,
         concat!(
             "Offset of field: ",
             stringify!(lzma_mt),
             "::",
-            stringify!(reserved_int6)
+            stringify!(memlimit_stop)
         )
     );
     assert_eq!(
@@ -2368,13 +2404,25 @@ extern "C" {
     ) -> lzma_ret;
 }
 extern "C" {
+    pub fn lzma_microlzma_encoder(
+        strm: *mut lzma_stream,
+        options: *const lzma_options_lzma,
+    ) -> lzma_ret;
+}
+extern "C" {
     pub fn lzma_stream_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret;
+}
+extern "C" {
+    pub fn lzma_stream_decoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret;
 }
 extern "C" {
     pub fn lzma_auto_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret;
 }
 extern "C" {
     pub fn lzma_alone_decoder(strm: *mut lzma_stream, memlimit: u64) -> lzma_ret;
+}
+extern "C" {
+    pub fn lzma_lzip_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret;
 }
 extern "C" {
     pub fn lzma_stream_buffer_decode(
@@ -2387,6 +2435,15 @@ extern "C" {
         out: *mut u8,
         out_pos: *mut usize,
         out_size: usize,
+    ) -> lzma_ret;
+}
+extern "C" {
+    pub fn lzma_microlzma_decoder(
+        strm: *mut lzma_stream,
+        comp_size: u64,
+        uncomp_size: u64,
+        uncomp_size_is_exact: lzma_bool,
+        dict_size: u32,
     ) -> lzma_ret;
 }
 #[repr(C)]
@@ -3641,6 +3698,14 @@ extern "C" {
         in_: *const u8,
         in_pos: *mut usize,
         in_size: usize,
+    ) -> lzma_ret;
+}
+extern "C" {
+    pub fn lzma_file_info_decoder(
+        strm: *mut lzma_stream,
+        dest_index: *mut *mut lzma_index,
+        memlimit: u64,
+        file_size: u64,
     ) -> lzma_ret;
 }
 #[repr(C)]
