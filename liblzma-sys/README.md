@@ -11,7 +11,7 @@
 Raw bindings to liblzma which contains an implementation of LZMA and xz stream
 encoding/decoding.
 
-High level Rust bindings are available in the `liblzma` crate.
+High level Rust bindings are available in the [liblzma](https://crates.io/crates/liblzma) crate.
 
 **This crate is forked from [lzma-sys](https://crates.io/crates/lzma-sys) and `liblzma-sys = "0.1.20"` is fully compatible with `lzma-sys = "0.1.20"`,**
 so you can migrate simply.
