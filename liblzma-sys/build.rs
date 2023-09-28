@@ -3,6 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 const SKIP_FILENAMES: &[&str] = &["crc32_small", "crc64_small"];
+const MIN_LIBLZMA: &str = "5.2.0";
 
 fn main() {
     let target = env::var("TARGET").unwrap();
@@ -18,7 +19,10 @@ fn main() {
     //
     // Otherwise check the system to see if it has an lzma library already
     // installed that we can use.
-    if !want_static && !msvc && pkg_config::probe_library("liblzma").is_ok() {
+    let pkg = pkg_config::Config::new()
+        .atleast_version(MIN_LIBLZMA)
+        .probe("liblzma");
+    if !want_static && !msvc && pkg.is_ok() {
         return;
     }
 
