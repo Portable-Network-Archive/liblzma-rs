@@ -235,7 +235,7 @@ mod tests {
         let mut d = XzDecoder::new(c);
         let mut data = vec![];
         d.read_to_end(&mut data).unwrap();
-        assert!(data == &m[..]);
+        assert_eq!(data, &m[..]);
     }
 
     #[test]
@@ -259,8 +259,8 @@ mod tests {
         unsafe {
             data.set_len(m.len());
         }
-        assert!(d.read(&mut data).unwrap() == m.len());
-        assert!(data == &m[..]);
+        assert_eq!(d.read(&mut data).unwrap(), m.len());
+        assert_eq!(data, &m[..]);
     }
 
     #[test]
@@ -273,7 +273,7 @@ mod tests {
 
         let mut d = XzDecoder::new(&result[..]);
         let mut data = Vec::new();
-        assert!(d.read(&mut data).unwrap() == 0);
+        assert_eq!(d.read(&mut data).unwrap(), 0);
     }
 
     #[test]
@@ -286,7 +286,7 @@ mod tests {
 
         let mut d = XzDecoder::new(&result[..]);
         let mut data = Vec::new();
-        assert!(d.read(&mut data).unwrap() == 0);
+        assert_eq!(d.read(&mut data).unwrap(), 0);
     }
 
     #[test]
