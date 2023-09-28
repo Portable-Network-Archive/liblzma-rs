@@ -39,7 +39,7 @@ jobs:
           - os: windows-latest
             rust: stable-x86_64-gnu
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Install Rust (rustup)
@@ -74,7 +74,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - name: Install Rust
