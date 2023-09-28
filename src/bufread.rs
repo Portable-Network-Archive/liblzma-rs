@@ -259,8 +259,7 @@ impl<R: AsyncWrite> AsyncWrite for XzDecoder<R> {
 
 #[cfg(test)]
 mod tests {
-    use crate::bufread::{XzDecoder, XzEncoder};
-    use std::io::Read;
+    use super::*;
 
     #[test]
     fn compressed_and_trailing_data() {
@@ -274,6 +273,9 @@ mod tests {
 
         let mut decoder_input = Vec::new();
         encoder.read_to_end(&mut decoder_input).unwrap();
+
+        assert_eq!(encoder.total_in(), to_compress.len() as u64);
+        assert_eq!(encoder.total_out(), decoder_input.len() as u64);
 
         // ...plus additional unrelated trailing data
         const ADDITIONAL_SIZE: usize = 123;
@@ -294,6 +296,11 @@ mod tests {
                 COMPRESSED_ORIG_SIZE
             );
             assert_eq!(decompressed_data, &to_compress[..]);
+            assert_eq!(
+                decoder.total_in(),
+                (decoder_input.len() - ADDITIONAL_SIZE) as u64
+            );
+            assert_eq!(decoder.total_out(), decompressed_data.len() as u64);
         }
 
         let mut remaining_data = Vec::new();
