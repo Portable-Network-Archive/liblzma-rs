@@ -26,7 +26,7 @@ fn main() {
         return;
     }
 
-    let want_threading = cfg!(feature = "threading");
+    let want_parallel = cfg!(feature = "parallel");
 
     let out_dir = env::var("OUT_DIR").unwrap();
     println!("cargo:root={}", out_dir);
@@ -50,7 +50,7 @@ fn main() {
     ])
     .collect::<Vec<_>>();
 
-    if !want_threading {
+    if !want_parallel {
         src_files = src_files
             .into_iter()
             .filter(|path| !path.file_stem().unwrap().to_str().unwrap().ends_with("mt"))
@@ -79,11 +79,11 @@ fn main() {
 
     if !target.ends_with("msvc") {
         build.flag("-std=c99");
-        if want_threading {
+        if want_parallel {
             build.flag("-pthread");
         }
     }
-    if want_threading {
+    if want_parallel {
         build.define("LZMA_SYS_ENABLE_THREADS", "1");
     }
 
