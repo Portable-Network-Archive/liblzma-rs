@@ -54,17 +54,19 @@ jobs:
       run: echo LZMA_API_STATIC=1 >> $GITHUB_ENV
       shell: bash
     - run: cargo test --no-default-features
-    - run: cargo clean
+    - run: cargo clean -p liblzma -p liblzma-sys
     - run: cargo test --features tokio
-    - run: cargo clean
+    - run: cargo clean -p liblzma -p liblzma-sys
     - run: cargo test --features parallel
-    - run: cargo clean
+    - run: cargo clean -p liblzma -p liblzma-sys
     - run: cargo test --features bindgen
-    - run: cargo clean
+    - run: cargo clean -p liblzma -p liblzma-sys
     - run: cargo test --features tokio parallel
-    - run: cargo clean
+    - run: cargo clean -p liblzma -p liblzma-sys
     - run: cargo test --all-features
     - run: cargo run --manifest-path systest/Cargo.toml
+      if: matrix.static == 'yes'
+    - run: cargo clean -p liblzma -p liblzma-sys
       if: matrix.static == 'yes'
     - run: cargo run --manifest-path systest/Cargo.toml --features bindgen
       if: matrix.static == 'yes'
