@@ -899,14 +899,14 @@ fn cvt(rc: liblzma_sys::lzma_ret) -> Result<Status, Error> {
 impl From<Error> for io::Error {
     fn from(e: Error) -> io::Error {
         let kind = match e {
-            Error::Data => std::io::ErrorKind::InvalidData,
-            Error::Options => std::io::ErrorKind::InvalidInput,
-            Error::Format => std::io::ErrorKind::InvalidData,
-            Error::MemLimit => std::io::ErrorKind::Other,
-            Error::Mem => std::io::ErrorKind::Other,
-            Error::Program => std::io::ErrorKind::Other,
-            Error::NoCheck => std::io::ErrorKind::InvalidInput,
-            Error::UnsupportedCheck => std::io::ErrorKind::Other,
+            Error::Data => io::ErrorKind::InvalidData,
+            Error::Options => io::ErrorKind::InvalidInput,
+            Error::Format => io::ErrorKind::InvalidData,
+            Error::MemLimit => io::ErrorKind::Other,
+            Error::Mem => io::ErrorKind::Other,
+            Error::Program => io::ErrorKind::Other,
+            Error::NoCheck => io::ErrorKind::InvalidInput,
+            Error::UnsupportedCheck => io::ErrorKind::Other,
         };
 
         io::Error::new(kind, e)
