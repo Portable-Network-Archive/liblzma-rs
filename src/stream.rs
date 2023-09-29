@@ -497,7 +497,7 @@ impl LzmaOptions {
     /// assumed in general. The default of 2 means four-byte alignment (2^ pb
     /// =2^2=4), which is often a good choice when there's no better guess.
     ///
-    /// When the aligment is known, setting pb accordingly may reduce the file
+    /// When the alignment is known, setting pb accordingly may reduce the file
     /// size a little. E.g. with text files having one-byte alignment (US-ASCII,
     /// ISO-8859-*, UTF-8), setting pb=0 can improve compression slightly. For
     /// UTF-16 text, pb=1 is a good choice. If the alignment is an odd number
