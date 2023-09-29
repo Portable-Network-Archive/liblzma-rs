@@ -179,15 +179,14 @@ impl<W: Write> XzDecoder<W> {
     /// Creates a new decoding stream which will decode into `obj` one xz stream
     /// from the input written to it.
     pub fn new(obj: W) -> XzDecoder<W> {
-        let stream = Stream::new_stream_decoder(u64::max_value(), 0).unwrap();
+        let stream = Stream::new_stream_decoder(u64::MAX, 0).unwrap();
         XzDecoder::new_stream(obj, stream)
     }
 
     /// Creates a new decoding stream which will decode into `obj` all the xz streams
     /// from the input written to it.
     pub fn new_multi_decoder(obj: W) -> XzDecoder<W> {
-        let stream =
-            Stream::new_stream_decoder(u64::max_value(), liblzma_sys::LZMA_CONCATENATED).unwrap();
+        let stream = Stream::new_stream_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(obj, stream)
     }
 

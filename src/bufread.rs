@@ -143,15 +143,14 @@ impl<R: BufRead> XzDecoder<R> {
     /// Creates a new decoder which will decompress data read from the given
     /// stream.
     pub fn new(r: R) -> XzDecoder<R> {
-        let stream = Stream::new_stream_decoder(u64::max_value(), 0).unwrap();
+        let stream = Stream::new_stream_decoder(u64::MAX, 0).unwrap();
         XzDecoder::new_stream(r, stream)
     }
 
     /// Creates a new decoder which will decompress data read from the given
     /// input. All the concatenated xz streams from input will be consumed.
     pub fn new_multi_decoder(r: R) -> XzDecoder<R> {
-        let stream =
-            Stream::new_auto_decoder(u64::max_value(), liblzma_sys::LZMA_CONCATENATED).unwrap();
+        let stream = Stream::new_auto_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(r, stream)
     }
 
