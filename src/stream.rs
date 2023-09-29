@@ -408,7 +408,7 @@ impl Stream {
                 self.process(input, out, action)
             };
             output.set_len((self.total_out() - before) as usize + len);
-            return ret;
+            ret
         }
     }
 
@@ -777,7 +777,7 @@ impl MtStreamBuilder {
                 filters: None,
             };
             init.raw.threads = 1;
-            return init;
+            init
         }
     }
 
