@@ -129,7 +129,7 @@ pub enum Action {
 }
 
 /// Return value of a `process` operation.
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Status {
     /// Operation completed successfully.
     Ok,
