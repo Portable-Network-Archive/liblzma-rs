@@ -37,6 +37,7 @@ impl<W: Write> XzEncoder<W> {
 
     /// Create a new encoder which will use the specified `Stream` to encode
     /// (compress) data into the provided `obj`.
+    #[inline]
     pub fn new_stream(obj: W, stream: Stream) -> XzEncoder<W> {
         XzEncoder {
             data: stream,
@@ -46,6 +47,7 @@ impl<W: Write> XzEncoder<W> {
     }
 
     /// Acquires a reference to the underlying writer.
+    #[inline]
     pub fn get_ref(&self) -> &W {
         self.obj.as_ref().unwrap()
     }
@@ -54,6 +56,7 @@ impl<W: Write> XzEncoder<W> {
     ///
     /// Note that mutating the output/input state of the stream may corrupt this
     /// object, so care must be taken when using this method.
+    #[inline]
     pub fn get_mut(&mut self) -> &mut W {
         self.obj.as_mut().unwrap()
     }
@@ -107,12 +110,14 @@ impl<W: Write> XzEncoder<W> {
     /// Note that, due to buffering, this only bears any relation to
     /// `total_in()` after a call to `flush()`.  At that point,
     /// `total_out() / total_in()` is the compression ratio.
+    #[inline]
     pub fn total_out(&self) -> u64 {
         self.data.total_out()
     }
 
     /// Returns the number of bytes consumed by the compressor
     /// (e.g. the number of bytes written to this stream.)
+    #[inline]
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
     }
@@ -159,6 +164,7 @@ impl<W: AsyncWrite> AsyncWrite for XzEncoder<W> {
 }
 
 impl<W: Read + Write> Read for XzEncoder<W> {
+    #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.get_mut().read(buf)
     }
@@ -168,6 +174,7 @@ impl<W: Read + Write> Read for XzEncoder<W> {
 impl<W: AsyncRead + AsyncWrite> AsyncRead for XzEncoder<W> {}
 
 impl<W: Write> Drop for XzEncoder<W> {
+    #[inline]
     fn drop(&mut self) {
         if self.obj.is_some() {
             let _ = self.try_finish();
@@ -195,6 +202,7 @@ impl<W: Write> XzDecoder<W> {
     ///
     /// A custom `stream` can be specified to configure what format this decoder
     /// will recognize or configure other various decoding options.
+    #[inline]
     pub fn new_stream(obj: W, stream: Stream) -> XzDecoder<W> {
         XzDecoder {
             data: stream,
@@ -204,6 +212,7 @@ impl<W: Write> XzDecoder<W> {
     }
 
     /// Acquires a reference to the underlying writer.
+    #[inline]
     pub fn get_ref(&self) -> &W {
         self.obj.as_ref().unwrap()
     }
@@ -212,6 +221,7 @@ impl<W: Write> XzDecoder<W> {
     ///
     /// Note that mutating the output/input state of the stream may corrupt this
     /// object, so care must be taken when using this method.
+    #[inline]
     pub fn get_mut(&mut self) -> &mut W {
         self.obj.as_mut().unwrap()
     }
@@ -258,12 +268,14 @@ impl<W: Write> XzDecoder<W> {
     /// Note that, due to buffering, this only bears any relation to
     /// `total_in()` after a call to `flush()`.  At that point,
     /// `total_in() / total_out()` is the compression ratio.
+    #[inline]
     pub fn total_out(&self) -> u64 {
         self.data.total_out()
     }
 
     /// Returns the number of bytes consumed by the decompressor
     /// (e.g. the number of bytes written to this stream.)
+    #[inline]
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
     }
@@ -299,6 +311,7 @@ impl<W: AsyncWrite> AsyncWrite for XzDecoder<W> {
 }
 
 impl<W: Read + Write> Read for XzDecoder<W> {
+    #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.get_mut().read(buf)
     }
