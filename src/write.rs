@@ -317,8 +317,9 @@ impl<W: Write> Drop for XzDecoder<W> {
 
 #[cfg(test)]
 mod tests {
-    use super::{XzDecoder, XzEncoder};
-    use std::io::prelude::*;
+    use super::*;
+    use crate::stream::LzmaOptions;
+    use quickcheck::quickcheck;
     use std::iter::repeat;
 
     #[test]
@@ -341,6 +342,21 @@ mod tests {
         c.write(b"").unwrap();
         let data = c.finish().unwrap().finish().unwrap();
         assert_eq!(&data[..], b"");
+    }
+
+    #[test]
+    fn qc_lzma1() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let stream = Stream::new_lzma_decoder(u64::MAX).unwrap();
+            let w = XzDecoder::new_stream(Vec::new(), stream);
+            let options = LzmaOptions::new_preset(6).unwrap();
+            let stream = Stream::new_lzma_encoder(&options).unwrap();
+            let mut w = XzEncoder::new_stream(w, stream);
+            w.write_all(&v).unwrap();
+            v == w.finish().unwrap().finish().unwrap()
+        }
     }
 
     #[test]

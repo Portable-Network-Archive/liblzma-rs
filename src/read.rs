@@ -201,9 +201,10 @@ impl<R: AsyncWrite + Read> AsyncWrite for XzDecoder<R> {
 
 #[cfg(test)]
 mod tests {
-    use crate::read::{XzDecoder, XzEncoder};
+    use super::*;
+    use crate::stream::LzmaOptions;
+    use quickcheck::quickcheck;
     use rand::{thread_rng, Rng};
-    use std::io::prelude::*;
     use std::iter;
 
     #[test]
@@ -287,6 +288,21 @@ mod tests {
         let mut d = XzDecoder::new(&result[..]);
         let mut data = Vec::new();
         assert_eq!(d.read(&mut data).unwrap(), 0);
+    }
+
+    #[test]
+    fn qc_lzma1() {
+        quickcheck(test as fn(_) -> _);
+        fn test(v: Vec<u8>) -> bool {
+            let options = LzmaOptions::new_preset(6).unwrap();
+            let stream = Stream::new_lzma_encoder(&options).unwrap();
+            let r = XzEncoder::new_stream(&v[..], stream);
+            let stream = Stream::new_lzma_decoder(u64::MAX).unwrap();
+            let mut r = XzDecoder::new_stream(r, stream);
+            let mut v2 = Vec::new();
+            r.read_to_end(&mut v2).unwrap();
+            v == v2
+        }
     }
 
     #[test]
