@@ -413,11 +413,13 @@ impl Stream {
     }
 
     /// Returns the total amount of input bytes consumed by this stream.
+    #[inline]
     pub fn total_in(&self) -> u64 {
         self.raw.total_in
     }
 
     /// Returns the total amount of bytes produced by this stream.
+    #[inline]
     pub fn total_out(&self) -> u64 {
         self.raw.total_out
     }
@@ -425,6 +427,7 @@ impl Stream {
     /// Get the current memory usage limit.
     ///
     /// This is only supported if the underlying stream supports a memlimit.
+    #[inline]
     pub fn memlimit(&self) -> u64 {
         unsafe { liblzma_sys::lzma_memlimit_get(&self.raw) }
     }
@@ -433,6 +436,7 @@ impl Stream {
     ///
     /// This can return `Error::MemLimit` if the new limit is too small or
     /// `Error::Program` if this stream doesn't take a memory limit.
+    #[inline]
     pub fn set_memlimit(&mut self, limit: u64) -> Result<(), Error> {
         cvt(unsafe { liblzma_sys::lzma_memlimit_set(&mut self.raw, limit) }).map(|_| ())
     }
@@ -443,6 +447,7 @@ impl LzmaOptions {
     ///
     /// The `preset` argument is the compression level to use, typically in the
     /// range of 0-9.
+    #[inline]
     pub fn new_preset(preset: u32) -> Result<LzmaOptions, Error> {
         unsafe {
             let mut options = LzmaOptions { raw: mem::zeroed() };
@@ -461,6 +466,7 @@ impl LzmaOptions {
     /// uncompressed data is kept in memory.
     ///
     /// The minimum dictionary size is 4096 bytes and the default is 2^23, 8MB.
+    #[inline]
     pub fn dict_size(&mut self, size: u32) -> &mut LzmaOptions {
         self.raw.dict_size = size;
         self
@@ -474,6 +480,7 @@ impl LzmaOptions {
     ///
     /// The maximum value to this is 4 and the default is 3. It is not currently
     /// supported if this plus `literal_position_bits` is greater than 4.
+    #[inline]
     pub fn literal_context_bits(&mut self, bits: u32) -> &mut LzmaOptions {
         self.raw.lc = bits;
         self
@@ -486,6 +493,7 @@ impl LzmaOptions {
     /// `position_bits` for more information about alignment.
     ///
     /// The default for this is 0.
+    #[inline]
     pub fn literal_position_bits(&mut self, bits: u32) -> &mut LzmaOptions {
         self.raw.lp = bits;
         self
@@ -507,12 +515,14 @@ impl LzmaOptions {
     /// and LZMA2 still slightly favor 16-byte alignment. It might be worth
     /// taking into account when designing file formats that are likely to be
     /// often compressed with LZMA1 or LZMA2.
+    #[inline]
     pub fn position_bits(&mut self, bits: u32) -> &mut LzmaOptions {
         self.raw.pb = bits;
         self
     }
 
     /// Configures the compression mode.
+    #[inline]
     pub fn mode(&mut self, mode: Mode) -> &mut LzmaOptions {
         self.raw.mode = mode as liblzma_sys::lzma_mode;
         self
@@ -533,12 +543,14 @@ impl LzmaOptions {
     ///
     /// The exact minimum value depends on the match finder. The maximum is 273,
     /// which is the maximum length of a match that LZMA1 and LZMA2 can encode.
+    #[inline]
     pub fn nice_len(&mut self, len: u32) -> &mut LzmaOptions {
         self.raw.nice_len = len;
         self
     }
 
     /// Configures the match finder ID.
+    #[inline]
     pub fn match_finder(&mut self, mf: MatchFinder) -> &mut LzmaOptions {
         self.raw.mf = mf as liblzma_sys::lzma_match_finder;
         self
@@ -570,6 +582,7 @@ impl LzmaOptions {
     /// remain fast enough with typical input, but malicious input could cause
     /// the match finder to slow down dramatically, possibly creating a denial
     /// of service attack.
+    #[inline]
     pub fn depth(&mut self, depth: u32) -> &mut LzmaOptions {
         self.raw.depth = depth;
         self
@@ -578,6 +591,7 @@ impl LzmaOptions {
 
 impl Check {
     /// Test if this check is supported in this build of liblzma.
+    #[inline]
     pub fn is_supported(&self) -> bool {
         let ret = unsafe { liblzma_sys::lzma_check_is_supported(*self as liblzma_sys::lzma_check) };
         ret != 0
@@ -586,6 +600,7 @@ impl Check {
 
 impl MatchFinder {
     /// Test if this match finder is supported in this build of liblzma.
+    #[inline]
     pub fn is_supported(&self) -> bool {
         let ret =
             unsafe { liblzma_sys::lzma_mf_is_supported(*self as liblzma_sys::lzma_match_finder) };
@@ -595,6 +610,7 @@ impl MatchFinder {
 
 impl Filters {
     /// Creates a new filter chain with no filters.
+    #[inline]
     pub fn new() -> Filters {
         Filters {
             inner: vec![liblzma_sys::lzma_filter {
@@ -613,6 +629,7 @@ impl Filters {
     ///
     /// LZMA1 shouldn't be used for new applications unless you _really_ know
     /// what you are doing.  LZMA2 is almost always a better choice.
+    #[inline]
     pub fn lzma1(&mut self, opts: &LzmaOptions) -> &mut Filters {
         self.lzma_opts.push_back(opts.raw);
         let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
@@ -629,6 +646,7 @@ impl Filters {
     /// trying to compress uncompressible data), possibility to change
     /// `literal_context_bits`/`literal_position_bits`/`position_bits` in the
     /// middle of encoding, and some other internal improvements.
+    #[inline]
     pub fn lzma2(&mut self, opts: &LzmaOptions) -> &mut Filters {
         self.lzma_opts.push_back(opts.raw);
         let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
@@ -653,6 +671,7 @@ impl Filters {
     /// filters.x86();
     /// filters.lzma2(&opts);
     /// ```
+    #[inline]
     pub fn x86(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_X86,
@@ -673,6 +692,7 @@ impl Filters {
     /// filters.powerpc();
     /// filters.lzma2(&opts);
     /// ```
+    #[inline]
     pub fn powerpc(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_POWERPC,
@@ -693,6 +713,7 @@ impl Filters {
     /// filters.ia64();
     /// filters.lzma2(&opts);
     /// ```
+    #[inline]
     pub fn ia64(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_IA64,
@@ -713,6 +734,7 @@ impl Filters {
     /// filters.arm();
     /// filters.lzma2(&opts);
     /// ```
+    #[inline]
     pub fn arm(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_ARM,
@@ -733,6 +755,7 @@ impl Filters {
     /// filters.arm_thumb();
     /// filters.lzma2(&opts);
     /// ```
+    #[inline]
     pub fn arm_thumb(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
@@ -753,6 +776,7 @@ impl Filters {
     /// filters.sparc();
     /// filters.lzma2(&opts);
     /// ```
+    #[inline]
     pub fn sparc(&mut self) -> &mut Filters {
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_SPARC,
@@ -760,6 +784,7 @@ impl Filters {
         })
     }
 
+    #[inline]
     fn push(&mut self, filter: liblzma_sys::lzma_filter) -> &mut Filters {
         let pos = self.inner.len() - 1;
         self.inner.insert(pos, filter);
@@ -770,6 +795,7 @@ impl Filters {
 #[cfg(feature = "parallel")]
 impl MtStreamBuilder {
     /// Creates a new blank builder to create a multithreaded encoding `Stream`.
+    #[inline]
     pub fn new() -> MtStreamBuilder {
         unsafe {
             let mut init = MtStreamBuilder {
@@ -782,6 +808,7 @@ impl MtStreamBuilder {
     }
 
     /// Configures the number of worker threads to use
+    #[inline]
     pub fn threads(&mut self, threads: u32) -> &mut Self {
         self.raw.threads = threads;
         self
@@ -808,6 +835,7 @@ impl MtStreamBuilder {
     /// For each thread, about 3 * `block_size` bytes of memory will be
     /// allocated. This may change in later liblzma versions. If so, the memory
     /// usage will probably be reduced, not increased.
+    #[inline]
     pub fn block_size(&mut self, block_size: u64) -> &mut Self {
         self.raw.block_size = block_size;
         self
@@ -833,6 +861,7 @@ impl MtStreamBuilder {
     /// value of 0, which will disable the timeout mechanism and will make
     /// `process` block until all the input is consumed or the output
     /// buffer has been filled.
+    #[inline]
     pub fn timeout_ms(&mut self, timeout: u32) -> &mut Self {
         self.raw.timeout = timeout;
         self
@@ -842,12 +871,14 @@ impl MtStreamBuilder {
     ///
     /// The preset is set just like with `Stream::new_easy_encoder`. The preset
     /// is ignored if filters below have been specified.
+    #[inline]
     pub fn preset(&mut self, preset: u32) -> &mut Self {
         self.raw.preset = preset;
         self
     }
 
     /// Configure a custom filter chain
+    #[inline]
     pub fn filters(&mut self, filters: Filters) -> &mut Self {
         self.raw.filters = filters.inner.as_ptr();
         self.filters = Some(filters);
@@ -855,17 +886,20 @@ impl MtStreamBuilder {
     }
 
     /// Configures the integrity check type
+    #[inline]
     pub fn check(&mut self, check: Check) -> &mut Self {
         self.raw.check = check as liblzma_sys::lzma_check;
         self
     }
 
     /// Calculate approximate memory usage of multithreaded .xz encoder
+    #[inline]
     pub fn memusage(&self) -> u64 {
         unsafe { liblzma_sys::lzma_stream_encoder_mt_memusage(&self.raw) }
     }
 
     /// Initialize multithreaded .xz stream encoder.
+    #[inline]
     pub fn encoder(&self) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -897,6 +931,7 @@ fn cvt(rc: liblzma_sys::lzma_ret) -> Result<Status, Error> {
 }
 
 impl From<Error> for io::Error {
+    #[inline]
     fn from(e: Error) -> io::Error {
         let kind = match e {
             Error::Data => io::ErrorKind::InvalidData,
@@ -916,6 +951,7 @@ impl From<Error> for io::Error {
 impl error::Error for Error {}
 
 impl fmt::Display for Error {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::Data => "lzma data error",
@@ -932,6 +968,7 @@ impl fmt::Display for Error {
 }
 
 impl Drop for Stream {
+    #[inline]
     fn drop(&mut self) {
         unsafe {
             liblzma_sys::lzma_end(&mut self.raw);
