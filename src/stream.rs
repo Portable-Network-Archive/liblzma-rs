@@ -158,7 +158,7 @@ pub enum Status {
 }
 
 /// Possible error codes that can be returned from a processing operation.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Error {
     /// The underlying data was corrupt.
     Data,
