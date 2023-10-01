@@ -31,7 +31,6 @@ tokio-core = "0.1.17"
 default = ["bindgen"]
 tokio = ["tokio-io", "futures"]
 static = ["liblzma-sys/static"]
-threading = ["parallel"]
 parallel = ["liblzma-sys/parallel"]
 bindgen = ["liblzma-sys/bindgen"]
 
