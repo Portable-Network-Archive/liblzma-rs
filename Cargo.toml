@@ -28,7 +28,7 @@ quickcheck = "1.0.1"
 tokio-core = "0.1.17"
 
 [features]
-default = ["bindgen", "parallel"]
+default = ["bindgen"]
 tokio = ["tokio-io", "futures"]
 static = ["liblzma-sys/static"]
 threading = ["parallel"]
