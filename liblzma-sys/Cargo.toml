@@ -27,6 +27,5 @@ pkg-config = "0.3.18"
 [features]
 default = ["parallel"]
 static = []
-threading = ["parallel"]
 bindgen = []
 parallel = []
