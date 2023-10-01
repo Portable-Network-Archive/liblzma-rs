@@ -25,7 +25,7 @@ cc = { version = "1.0.49", features = ["parallel"] }
 pkg-config = "0.3.18"
 
 [features]
-default = ["parallel"]
+default = ["bindgen", "parallel"]
 static = []
 threading = ["parallel"]
 bindgen = []
