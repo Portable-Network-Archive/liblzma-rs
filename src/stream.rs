@@ -753,6 +753,27 @@ impl Filters {
         })
     }
 
+    /// Add a filter for ARM64 binaries.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let dict_size = 0x40000;
+    /// let mut opts = LzmaOptions::new_preset(6).unwrap();
+    /// opts.dict_size(dict_size);
+    /// let mut filters = Filters::new();
+    /// filters.arm64();
+    /// filters.lzma2(&opts);
+    /// ```
+    #[inline]
+    pub fn arm64(&mut self) -> &mut Filters {
+        self.push(liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_ARM64,
+            options: std::ptr::null_mut(),
+        })
+    }
+
     /// Add a filter for ARM-Thumb binaries.
     ///
     /// # Examples
