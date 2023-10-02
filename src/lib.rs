@@ -28,7 +28,16 @@
 //! library is not required at runtime:
 //!
 //! ```toml
-//! liblzma = { version = "0.1.7", features = ["static"] }
+//! liblzma = { version = "0.2.0", features = ["static"] }
+//! ```
+//!
+//! # Multithreading
+//!
+//! This crate optionally can support multithreading using the `parallel`
+//! feature of this crate:
+//!
+//! ```toml
+//! liblzma = { version = "0.2.0", features = ["parallel"] }
 //! ```
 //!
 //! # Async I/O
@@ -37,7 +46,7 @@
 //! the `tokio` feature of this crate:
 //!
 //! ```toml
-//! liblzma = { version = "0.1.7", features = ["tokio"] }
+//! liblzma = { version = "0.2.0", features = ["tokio"] }
 //! ```
 //!
 //! All methods are internally capable of working with streams that may return
