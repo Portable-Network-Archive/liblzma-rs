@@ -48,6 +48,7 @@ pub const LZMA_FILTER_IA64: lzma_vli = 0x06;
 pub const LZMA_FILTER_ARM: lzma_vli = 0x07;
 pub const LZMA_FILTER_ARMTHUMB: lzma_vli = 0x08;
 pub const LZMA_FILTER_SPARC: lzma_vli = 0x09;
+pub const LZMA_FILTER_ARM64: lzma_vli = 0x0A;
 pub const LZMA_FILTER_LZMA1: lzma_vli = 0x4000000000000001;
 pub const LZMA_FILTER_LZMA2: lzma_vli = 0x21;
 
