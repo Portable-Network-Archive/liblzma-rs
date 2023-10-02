@@ -13,7 +13,7 @@ encoding/decoding.
 
 High level Rust bindings are available in the [liblzma](https://crates.io/crates/liblzma) crate.
 
-**This crate is forked from [lzma-sys](https://crates.io/crates/lzma-sys) and `liblzma-sys = "0.1.20"` is fully compatible with `lzma-sys = "0.1.20"`,**
+**This crate is forked from [lzma-sys](https://crates.io/crates/lzma-sys) and `liblzma-sys = "0.1.x"` is fully compatible with `lzma-sys = "0.1.20"`,**
 so you can migrate simply.
 
 ## Migrate from lzma-sys
@@ -30,6 +30,12 @@ so you can migrate simply.
 -use lzma_sys;
 +use liblzma_sys;
 ```
+
+## Version 0.2.x breaking changes
+
+- XZ upgraded to 5.4
+- Multithreading is disabled by default.
+  This feature is available by enabling the `parallel` feature
 
 ## License
 
