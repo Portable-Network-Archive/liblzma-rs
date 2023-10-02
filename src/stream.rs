@@ -924,6 +924,20 @@ impl MtStreamBuilder {
         self
     }
 
+    /// Memory usage limit to reduce the number of threads
+    #[inline]
+    pub fn memlimit_threading(&mut self, memlimit: u64) -> &mut Self {
+        self.raw.memlimit_threading = memlimit;
+        self
+    }
+
+    /// Memory usage limit that should never be exceeded
+    #[inline]
+    pub fn memlimit_stop(&mut self, memlimit: u64) -> &mut Self {
+        self.raw.memlimit_stop = memlimit;
+        self
+    }
+
     /// Calculate approximate memory usage of multithreaded .xz encoder
     #[inline]
     pub fn memusage(&self) -> u64 {
@@ -941,6 +955,14 @@ impl MtStreamBuilder {
             ))?;
             Ok(init)
         }
+    }
+
+    /// Initialize multithreaded .xz stream decoder.
+    #[inline]
+    pub fn decoder(&self) -> Result<Stream, Error> {
+        let mut init = unsafe { Stream::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_stream_decoder_mt(&mut init.raw, &self.raw) })?;
+        Ok(init)
     }
 }
 

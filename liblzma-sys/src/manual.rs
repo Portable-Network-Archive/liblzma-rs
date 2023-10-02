@@ -145,8 +145,8 @@ pub struct lzma_mt {
     reserved_int2: u32,
     reserved_int3: u32,
     reserved_int4: u32,
-    reserved_int5: u64,
-    reserved_int6: u64,
+    pub memlimit_threading: u64,
+    pub memlimit_stop: u64,
     reserved_int7: u64,
     reserved_int8: u64,
     reserved_ptr1: *mut c_void,
@@ -243,6 +243,8 @@ extern "C" {
     pub fn lzma_stream_encoder_mt_memusage(options: *const lzma_mt) -> u64;
     #[cfg(feature = "parallel")]
     pub fn lzma_stream_encoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret;
+    #[cfg(feature = "parallel")]
+    pub fn lzma_stream_decoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret;
 
     pub fn lzma_alone_encoder(
         strm: *mut lzma_stream,
