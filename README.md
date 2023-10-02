@@ -11,7 +11,7 @@
 Bindings to the liblzma implementation in Rust, also provides types to
 read/write xz streams.
 
-**This crate is forked from [xz2](https://crates.io/crates/xz2) and `liblzma = "0.1.7"` is fully compatible with `xz2 = "0.1.7"`,**
+**This crate is forked from [xz2](https://crates.io/crates/xz2) and `liblzma = "0.1.x"` is fully compatible with `xz2 = "0.1.7"`,**
 so you can migrate simply.
 
 ## Migrate from xz2
@@ -28,6 +28,12 @@ so you can migrate simply.
 -use xz2;
 +use liblzma;
 ```
+
+## Version 0.2.x breaking changes
+
+- XZ upgraded to 5.4
+- Multithreading is disabled by default.
+  This feature is available by enabling the `parallel` feature
 
 ## License
 
