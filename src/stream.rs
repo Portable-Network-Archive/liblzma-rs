@@ -268,6 +268,10 @@ pub const IGNORE_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
 pub const CONCATENATED: u32 = liblzma_sys::LZMA_CONCATENATED;
 
 impl Stream {
+    #[inline]
+    unsafe fn zeroed() -> Self {
+        Self { raw: mem::zeroed() }
+    }
     /// Initialize .xz stream encoder using a preset number
     ///
     /// This is intended to be used by most for encoding data. The `preset`
@@ -365,6 +369,13 @@ impl Stream {
             ))?;
             Ok(init)
         }
+    }
+
+    /// Initialize a .lz stream decoder.
+    pub fn new_lzip_decoder(memlimit: u64, flags: u32) -> Result<Self, Error> {
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_lzip_decoder(&mut init.raw, memlimit, flags) })?;
+        Ok(init)
     }
 
     /// Processes some data from input into an output buffer.
