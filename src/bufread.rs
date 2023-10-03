@@ -9,6 +9,8 @@ use futures::Poll;
 #[cfg(feature = "tokio")]
 use tokio_io::{AsyncRead, AsyncWrite};
 
+#[cfg(feature = "parallel")]
+use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
 
 /// An xz encoder, or compressor.
@@ -37,6 +39,21 @@ impl<R: BufRead> XzEncoder<R> {
     pub fn new(r: R, level: u32) -> XzEncoder<R> {
         let stream = Stream::new_easy_encoder(level, Check::Crc64).unwrap();
         XzEncoder::new_stream(r, stream)
+    }
+
+    /// Creates a new parallel encoder which will read uncompressed data from the given
+    /// stream and emit the compressed stream.
+    ///
+    /// The `level` argument here is typically 0-9 with 6 being a good default.
+    #[cfg(feature = "parallel")]
+    pub fn new_parallel(r: R, level: u32) -> XzEncoder<R> {
+        let stream = MtStreamBuilder::new()
+            .preset(level)
+            .check(Check::Crc64)
+            .threads(num_cpus::get() as u32)
+            .encoder()
+            .unwrap();
+        Self::new_stream(r, stream)
     }
 
     /// Creates a new encoder with a custom `Stream`.
@@ -154,6 +171,18 @@ impl<R: BufRead> XzDecoder<R> {
     pub fn new(r: R) -> XzDecoder<R> {
         let stream = Stream::new_stream_decoder(u64::MAX, 0).unwrap();
         XzDecoder::new_stream(r, stream)
+    }
+
+    /// Creates a new parallel decoder which will decompress data read from the given
+    /// stream.
+    #[cfg(feature = "parallel")]
+    pub fn new_parallel(r: R) -> Self {
+        let stream = MtStreamBuilder::new()
+            .memlimit_stop(u64::MAX)
+            .threads(num_cpus::get() as u32)
+            .decoder()
+            .unwrap();
+        Self::new_stream(r, stream)
     }
 
     /// Creates a new decoder which will decompress data read from the given
