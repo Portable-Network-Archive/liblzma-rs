@@ -9,6 +9,8 @@ use futures::Poll;
 #[cfg(feature = "tokio")]
 use tokio_io::{try_nb, AsyncRead, AsyncWrite};
 
+#[cfg(feature = "parallel")]
+use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
 
 /// A compression stream which will have uncompressed data written to it and
@@ -34,6 +36,18 @@ impl<W: Write> XzEncoder<W> {
     pub fn new(obj: W, level: u32) -> XzEncoder<W> {
         let stream = Stream::new_easy_encoder(level, Check::Crc64).unwrap();
         XzEncoder::new_stream(obj, stream)
+    }
+    /// Create a new parallel compression stream which will compress at the given level
+    /// to write compress output to the give output stream.
+    #[cfg(feature = "parallel")]
+    pub fn new_parallel(obj: W, level: u32) -> XzEncoder<W> {
+        let stream = MtStreamBuilder::new()
+            .preset(level)
+            .check(Check::Crc64)
+            .threads(num_cpus::get() as u32)
+            .encoder()
+            .unwrap();
+        Self::new_stream(obj, stream)
     }
 
     /// Create a new encoder which will use the specified `Stream` to encode
@@ -191,6 +205,18 @@ impl<W: Write> XzDecoder<W> {
     pub fn new(obj: W) -> XzDecoder<W> {
         let stream = Stream::new_stream_decoder(u64::MAX, 0).unwrap();
         XzDecoder::new_stream(obj, stream)
+    }
+
+    /// Creates a new parallel decoding stream which will decode into `obj` one xz stream
+    /// from the input written to it.
+    #[cfg(feature = "parallel")]
+    pub fn new_parallel(obj: W) -> Self {
+        let stream = MtStreamBuilder::new()
+            .memlimit_stop(u64::MAX)
+            .threads(num_cpus::get() as u32)
+            .decoder()
+            .unwrap();
+        Self::new_stream(obj, stream)
     }
 
     /// Creates a new decoding stream which will decode into `obj` all the xz streams
@@ -382,10 +408,36 @@ mod tests {
 
     #[test]
     fn qc() {
-        ::quickcheck::quickcheck(test as fn(_) -> _);
+        quickcheck(test as fn(_) -> _);
 
         fn test(v: Vec<u8>) -> bool {
             let w = XzDecoder::new(Vec::new());
+            let mut w = XzEncoder::new(w, 6);
+            w.write_all(&v).unwrap();
+            v == w.finish().unwrap().finish().unwrap()
+        }
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn qc_parallel_encode() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let w = XzDecoder::new(Vec::new());
+            let mut w = XzEncoder::new_parallel(w, 6);
+            w.write_all(&v).unwrap();
+            v == w.finish().unwrap().finish().unwrap()
+        }
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn qc_parallel_decode() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let w = XzDecoder::new_parallel(Vec::new());
             let mut w = XzEncoder::new(w, 6);
             w.write_all(&v).unwrap();
             v == w.finish().unwrap().finish().unwrap()
