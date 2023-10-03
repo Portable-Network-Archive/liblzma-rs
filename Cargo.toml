@@ -33,6 +33,7 @@ tokio = ["tokio-io", "futures"]
 static = ["liblzma-sys/static"]
 parallel = ["liblzma-sys/parallel"]
 bindgen = ["liblzma-sys/bindgen"]
+wasm = ["liblzma-sys/wasm"]
 
 [package.metadata.docs.rs]
 features = ["tokio-io", "futures"]
