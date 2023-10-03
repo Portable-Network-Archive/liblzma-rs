@@ -1,4 +1,4 @@
-name: CI
+name: Build Webassembly
 on: [push, pull_request]
 
 jobs:
@@ -12,13 +12,13 @@ jobs:
           - nightly
         target: 
           - wasm32-unknown-emscripten
-#          - wasm32-unknown-unknown
+          - wasm32-unknown-unknown
           - wasm32-wasi
         include:
           - target: wasm32-unknown-emscripten
             container: emscripten/emsdk:latest
-#          - target: wasm32-unknown-unknown
-#            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
+          - target: wasm32-unknown-unknown
+            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
           - target: wasm32-wasi
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
 
