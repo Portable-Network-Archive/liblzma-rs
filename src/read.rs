@@ -35,6 +35,17 @@ impl<R: Read> XzEncoder<R> {
         }
     }
 
+    /// Create a new parallel compression stream which will compress at the given level
+    /// to read compress output to the give output stream.
+    ///
+    /// The `level` argument here is typically 0-9 with 6 being a good default.
+    #[cfg(feature = "parallel")]
+    pub fn new_parallel(r: R, level: u32) -> XzEncoder<R> {
+        XzEncoder {
+            inner: bufread::XzEncoder::new_parallel(BufReader::new(r), level),
+        }
+    }
+
     /// Creates a new encoder with a custom `Stream`.
     ///
     /// The `Stream` can be pre-configured for multithreaded encoding, different
@@ -128,6 +139,18 @@ impl<R: Read> XzDecoder<R> {
     pub fn new(r: R) -> XzDecoder<R> {
         XzDecoder {
             inner: bufread::XzDecoder::new(BufReader::new(r)),
+        }
+    }
+
+    /// Create a new parallel decompression stream, which will read compressed
+    /// data from the given input stream, and decompress one xz stream.
+    /// It may also consume input data that follows the xz stream.
+    /// Use [`xz::bufread::XzDecoder`] instead to process a mix of xz and non-xz data.
+    #[cfg(feature = "parallel")]
+    #[inline]
+    pub fn new_parallel(r: R) -> XzDecoder<R> {
+        XzDecoder {
+            inner: bufread::XzDecoder::new_parallel(BufReader::new(r)),
         }
     }
 
@@ -330,11 +353,39 @@ mod tests {
 
     #[test]
     fn qc() {
-        ::quickcheck::quickcheck(test as fn(_) -> _);
+        quickcheck(test as fn(_) -> _);
 
         fn test(v: Vec<u8>) -> bool {
             let r = XzEncoder::new(&v[..], 6);
             let mut r = XzDecoder::new(r);
+            let mut v2 = Vec::new();
+            r.read_to_end(&mut v2).unwrap();
+            v == v2
+        }
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn qc_parallel_encode() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let r = XzEncoder::new_parallel(&v[..], 6);
+            let mut r = XzDecoder::new(r);
+            let mut v2 = Vec::new();
+            r.read_to_end(&mut v2).unwrap();
+            v == v2
+        }
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn qc_parallel_decode() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let r = XzEncoder::new(&v[..], 6);
+            let mut r = XzDecoder::new_parallel(r);
             let mut v2 = Vec::new();
             r.read_to_end(&mut v2).unwrap();
             v == v2
