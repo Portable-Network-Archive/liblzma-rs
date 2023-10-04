@@ -828,15 +828,13 @@ impl Filters {
 impl MtStreamBuilder {
     /// Creates a new blank builder to create a multithreaded encoding `Stream`.
     #[inline]
-    pub fn new() -> MtStreamBuilder {
-        unsafe {
-            let mut init = MtStreamBuilder {
-                raw: mem::zeroed(),
-                filters: None,
-            };
-            init.raw.threads = 1;
-            init
-        }
+    pub fn new() -> Self {
+        let mut init = Self {
+            raw: unsafe { mem::zeroed() },
+            filters: None,
+        };
+        init.raw.threads = 1;
+        init
     }
 
     /// Configures the number of worker threads to use
