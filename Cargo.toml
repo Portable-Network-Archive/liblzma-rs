@@ -36,4 +36,4 @@ parallel = ["liblzma-sys/parallel", "num_cpus"]
 bindgen = ["liblzma-sys/bindgen"]
 
 [package.metadata.docs.rs]
-features = ["tokio-io", "futures"]
+features = ["tokio-io", "futures", "parallel"]
