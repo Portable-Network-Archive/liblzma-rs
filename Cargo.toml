@@ -37,4 +37,4 @@ bindgen = ["liblzma-sys/bindgen"]
 wasm = ["liblzma-sys/wasm"]
 
 [package.metadata.docs.rs]
-features = ["tokio-io", "futures"]
+features = ["tokio-io", "futures", "parallel"]
