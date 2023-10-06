@@ -61,8 +61,8 @@ fn main() {
     src_files.sort();
 
     let mut build = cc::Build::new();
-
     build
+        .define("NDEBUG", None)
         .files(src_files)
         // all C preproc defines are in `./config.h`
         .define("HAVE_CONFIG_H", "1")
