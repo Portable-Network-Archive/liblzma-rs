@@ -953,14 +953,9 @@ impl MtStreamBuilder {
     /// Initialize multithreaded .xz stream encoder.
     #[inline]
     pub fn encoder(&self) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_stream_encoder_mt(
-                &mut init.raw,
-                &self.raw,
-            ))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Stream::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_stream_encoder_mt(&mut init.raw, &self.raw) })?;
+        Ok(init)
     }
 
     /// Initialize multithreaded .xz stream decoder.
