@@ -280,6 +280,7 @@ impl Stream {
     ///
     /// The `check` argument is the integrity check to insert at the end of the
     /// stream. The default of `Crc64` is typically appropriate.
+    #[inline]
     pub fn new_easy_encoder(preset: u32, check: Check) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -305,6 +306,7 @@ impl Stream {
     /// The valid action values for `process` are `Run` and `Finish`. No kind
     /// of flushing is supported, because the file format doesn't make it
     /// possible.
+    #[inline]
     pub fn new_lzma_encoder(options: &LzmaOptions) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -317,6 +319,7 @@ impl Stream {
     ///
     /// This function is similar to `new_easy_encoder` but a custom filter chain
     /// is specified.
+    #[inline]
     pub fn new_stream_encoder(filters: &Filters, check: Check) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -334,6 +337,7 @@ impl Stream {
     /// The maximum memory usage can be specified along with flags such as
     /// `TELL_ANY_CHECK`, `TELL_NO_CHECK`, `TELL_UNSUPPORTED_CHECK`,
     /// `TELL_IGNORE_CHECK`, or `CONCATENATED`.
+    #[inline]
     pub fn new_stream_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -349,6 +353,7 @@ impl Stream {
     /// Initialize a .lzma stream decoder.
     ///
     /// The maximum memory usage can also be specified.
+    #[inline]
     pub fn new_lzma_decoder(memlimit: u64) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -359,6 +364,7 @@ impl Stream {
 
     /// Initialize a decoder which will choose a stream/lzma formats depending
     /// on the input stream.
+    #[inline]
     pub fn new_auto_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -383,6 +389,7 @@ impl Stream {
     /// This will perform the appropriate encoding or decoding operation
     /// depending on the kind of underlying stream. Documentation for the
     /// various `action` arguments can be found on the respective variants.
+    #[inline]
     pub fn process(
         &mut self,
         input: &[u8],
@@ -402,6 +409,7 @@ impl Stream {
     /// This function will use the extra capacity of `output` as a destination
     /// for bytes to be placed. The length of `output` will automatically get
     /// updated after the operation has completed.
+    #[inline]
     pub fn process_vec(
         &mut self,
         input: &[u8],
