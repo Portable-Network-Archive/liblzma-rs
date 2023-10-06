@@ -111,7 +111,7 @@ impl<R: BufRead> Read for XzEncoder<R> {
                 ret = self.data.process(input, buf, action);
                 read = (self.data.total_out() - before_out) as usize;
                 consumed = (self.data.total_in() - before_in) as usize;
-            }
+            };
             self.obj.consume(consumed);
 
             ret.unwrap();
