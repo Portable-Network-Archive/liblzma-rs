@@ -7,6 +7,9 @@ mod bindgen_wrap;
 #[cfg(not(feature = "bindgen"))]
 mod manual;
 
+#[cfg(target_arch = "wasm32")]
+mod wasm_shim;
+
 #[cfg(feature = "bindgen")]
 pub use bindgen_wrap::*;
 #[cfg(not(feature = "bindgen"))]
