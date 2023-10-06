@@ -30,6 +30,7 @@ pub struct XzDecoder<W: Write> {
 impl<W: Write> XzEncoder<W> {
     /// Create a new compression stream which will compress at the given level
     /// to write compress output to the give output stream.
+    #[inline]
     pub fn new(obj: W, level: u32) -> XzEncoder<W> {
         let stream = Stream::new_easy_encoder(level, Check::Crc64).unwrap();
         XzEncoder::new_stream(obj, stream)
@@ -79,6 +80,7 @@ impl<W: Write> XzEncoder<W> {
     ///
     /// Attempts to write data to this stream may result in a panic after this
     /// function is called.
+    #[inline]
     pub fn try_finish(&mut self) -> io::Result<()> {
         loop {
             self.dump()?;
@@ -100,6 +102,7 @@ impl<W: Write> XzEncoder<W> {
     /// the `try_finish` (or `shutdown`) method should be used instead. To
     /// re-acquire ownership of a stream it is safe to call this method after
     /// `try_finish` or `shutdown` has returned `Ok`.
+    #[inline]
     pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
         Ok(self.obj.take().unwrap())
@@ -124,6 +127,7 @@ impl<W: Write> XzEncoder<W> {
 }
 
 impl<W: Write> Write for XzEncoder<W> {
+    #[inline]
     fn write(&mut self, data: &[u8]) -> io::Result<usize> {
         loop {
             self.dump()?;
@@ -140,6 +144,7 @@ impl<W: Write> Write for XzEncoder<W> {
         }
     }
 
+    #[inline]
     fn flush(&mut self) -> io::Result<()> {
         loop {
             self.dump()?;
@@ -185,6 +190,7 @@ impl<W: Write> Drop for XzEncoder<W> {
 impl<W: Write> XzDecoder<W> {
     /// Creates a new decoding stream which will decode into `obj` one xz stream
     /// from the input written to it.
+    #[inline]
     pub fn new(obj: W) -> XzDecoder<W> {
         let stream = Stream::new_stream_decoder(u64::MAX, 0).unwrap();
         XzDecoder::new_stream(obj, stream)
@@ -192,6 +198,7 @@ impl<W: Write> XzDecoder<W> {
 
     /// Creates a new decoding stream which will decode into `obj` all the xz streams
     /// from the input written to it.
+    #[inline]
     pub fn new_multi_decoder(obj: W) -> XzDecoder<W> {
         let stream = Stream::new_stream_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(obj, stream)
@@ -258,6 +265,7 @@ impl<W: Write> XzDecoder<W> {
     }
 
     /// Unwrap the underlying writer, finishing the compression stream.
+    #[inline]
     pub fn finish(&mut self) -> io::Result<W> {
         self.try_finish()?;
         Ok(self.obj.take().unwrap())
@@ -282,6 +290,7 @@ impl<W: Write> XzDecoder<W> {
 }
 
 impl<W: Write> Write for XzDecoder<W> {
+    #[inline]
     fn write(&mut self, data: &[u8]) -> io::Result<usize> {
         loop {
             self.dump()?;
@@ -296,6 +305,7 @@ impl<W: Write> Write for XzDecoder<W> {
         }
     }
 
+    #[inline]
     fn flush(&mut self) -> io::Result<()> {
         self.dump()?;
         self.obj.as_mut().unwrap().flush()
@@ -321,6 +331,7 @@ impl<W: Read + Write> Read for XzDecoder<W> {
 impl<W: AsyncRead + AsyncWrite> AsyncRead for XzDecoder<W> {}
 
 impl<W: Write> Drop for XzDecoder<W> {
+    #[inline]
     fn drop(&mut self) {
         if self.obj.is_some() {
             let _ = self.try_finish();

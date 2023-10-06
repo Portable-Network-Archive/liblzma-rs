@@ -34,6 +34,7 @@ impl<R: BufRead> XzEncoder<R> {
     /// stream and emit the compressed stream.
     ///
     /// The `level` argument here is typically 0-9 with 6 being a good default.
+    #[inline]
     pub fn new(r: R, level: u32) -> XzEncoder<R> {
         let stream = Stream::new_easy_encoder(level, Check::Crc64).unwrap();
         XzEncoder::new_stream(r, stream)
@@ -97,6 +98,7 @@ impl<R> XzEncoder<R> {
 }
 
 impl<R: BufRead> Read for XzEncoder<R> {
+    #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         loop {
             let (read, consumed, eof, ret);
@@ -151,6 +153,7 @@ impl<R: AsyncWrite> AsyncWrite for XzEncoder<R> {
 impl<R: BufRead> XzDecoder<R> {
     /// Creates a new decoder which will decompress data read from the given
     /// stream.
+    #[inline]
     pub fn new(r: R) -> XzDecoder<R> {
         let stream = Stream::new_stream_decoder(u64::MAX, 0).unwrap();
         XzDecoder::new_stream(r, stream)
@@ -158,6 +161,7 @@ impl<R: BufRead> XzDecoder<R> {
 
     /// Creates a new decoder which will decompress data read from the given
     /// input. All the concatenated xz streams from input will be consumed.
+    #[inline]
     pub fn new_multi_decoder(r: R) -> XzDecoder<R> {
         let stream = Stream::new_auto_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(r, stream)
@@ -215,6 +219,7 @@ impl<R> XzDecoder<R> {
 }
 
 impl<R: BufRead> Read for XzDecoder<R> {
+    #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         loop {
             let (read, consumed, eof, ret);
