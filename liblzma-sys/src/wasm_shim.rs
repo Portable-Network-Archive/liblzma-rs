@@ -19,6 +19,9 @@ pub extern "C" fn rust_lzma_wasm_shim_calloc(nmemb: usize, size: usize) -> *mut 
 
 #[no_mangle]
 pub unsafe extern "C" fn rust_lzma_wasm_shim_free(ptr: *mut c_void) {
+    if ptr == std::ptr::null_mut() {
+        return;
+    }
     // layout is not actually used
     let layout = Layout::from_size_align_unchecked(1, 1);
     dealloc(ptr.cast(), layout);
