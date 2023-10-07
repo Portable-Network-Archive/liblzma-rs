@@ -62,8 +62,76 @@
 
 #![deny(missing_docs)]
 
+use std::io::{self, prelude::*};
+
 pub mod stream;
 
 pub mod bufread;
 pub mod read;
 pub mod write;
+
+/// Decompress from the given source as if using a [read::XzDecoder].
+///
+/// Result will be in the xz format.
+pub fn decode_all<R: Read>(source: R) -> io::Result<Vec<u8>> {
+    let mut vec = Vec::new();
+    let mut r = read::XzDecoder::new(source);
+    r.read_to_end(&mut vec)?;
+    Ok(vec)
+}
+
+/// Compress from the given source as if using a [read::XzEncoder].
+///
+/// The input data must be in the xz format.
+pub fn encode_all<R: Read>(source: R, level: u32) -> io::Result<Vec<u8>> {
+    let mut vec = Vec::new();
+    let mut r = read::XzEncoder::new(source, level);
+    r.read_to_end(&mut vec)?;
+    Ok(vec)
+}
+
+/// Compress all data from the given source as if using an [read::XzEncoder].
+///
+/// Compressed data will be appended to `destination`.
+pub fn copy_encode<R: Read, W: Write>(source: R, mut destination: W, level: u32) -> io::Result<()> {
+    io::copy(&mut read::XzEncoder::new(source, level), &mut destination)?;
+    Ok(())
+}
+
+/// Decompress all data from the given source as if using an [read::XzDecoder].
+///
+/// Decompressed data will be appended to `destination`.
+pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Result<()> {
+    io::copy(&mut read::XzDecoder::new(source), &mut destination)?;
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quickcheck::quickcheck;
+
+    #[test]
+    fn all() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let e = encode_all(&v[..], 6).unwrap();
+            let d = decode_all(&e[..]).unwrap();
+            v == d
+        }
+    }
+
+    #[test]
+    fn copy() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let mut e = Vec::new();
+            copy_encode(&v[..], &mut e, 6).unwrap();
+            let mut d = Vec::new();
+            copy_decode(&e[..], &mut d).unwrap();
+            v == d
+        }
+    }
+}
