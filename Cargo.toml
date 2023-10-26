@@ -20,7 +20,7 @@ members = ["systest"]
 [dependencies]
 liblzma-sys = { path = "liblzma-sys", version = "0.2.1", default-features = false }
 tokio-io = { version = "0.1.12", optional = true }
-futures = { version = "0.1.26", optional = true }
+futures = { version = "0.3.29", optional = true }
 
 [dev-dependencies]
 rand = "0.8.0"
