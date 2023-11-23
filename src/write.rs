@@ -133,9 +133,7 @@ impl<W: Write> Write for XzEncoder<W> {
             self.dump()?;
 
             let total_in = self.total_in();
-            self.data
-                .process_vec(data, &mut self.buf, Action::Run)
-                .unwrap();
+            self.data.process_vec(data, &mut self.buf, Action::Run)?;
             let written = (self.total_in() - total_in) as usize;
 
             if written > 0 || data.is_empty() {
@@ -150,8 +148,7 @@ impl<W: Write> Write for XzEncoder<W> {
             self.dump()?;
             let status = self
                 .data
-                .process_vec(&[], &mut self.buf, Action::FullFlush)
-                .unwrap();
+                .process_vec(&[], &mut self.buf, Action::FullFlush)?;
             if status == Status::StreamEnd {
                 break;
             }
