@@ -236,7 +236,7 @@ impl<W: Write> XzDecoder<W> {
     fn dump(&mut self) -> io::Result<()> {
         if !self.buf.is_empty() {
             self.obj.as_mut().unwrap().write_all(&self.buf)?;
-            self.buf.truncate(0);
+            self.buf.clear();
         }
         Ok(())
     }
