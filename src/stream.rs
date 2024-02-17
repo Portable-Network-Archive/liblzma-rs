@@ -282,15 +282,11 @@ impl Stream {
     /// stream. The default of `Crc64` is typically appropriate.
     #[inline]
     pub fn new_easy_encoder(preset: u32, check: Check) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_easy_encoder(
-                &mut init.raw,
-                preset,
-                check as liblzma_sys::lzma_check,
-            ))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Stream::zeroed() };
+        cvt(unsafe {
+            liblzma_sys::lzma_easy_encoder(&mut init.raw, preset, check as liblzma_sys::lzma_check)
+        })?;
+        Ok(init)
     }
 
     /// Initialize .lzma encoder (legacy file format)
@@ -308,11 +304,9 @@ impl Stream {
     /// possible.
     #[inline]
     pub fn new_lzma_encoder(options: &LzmaOptions) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_alone_encoder(&mut init.raw, &options.raw))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Stream::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_alone_encoder(&mut init.raw, &options.raw) })?;
+        Ok(init)
     }
 
     /// Initialize .xz Stream encoder using a custom filter chain
@@ -321,15 +315,15 @@ impl Stream {
     /// is specified.
     #[inline]
     pub fn new_stream_encoder(filters: &Filters, check: Check) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_stream_encoder(
+        let mut init = unsafe { Stream::zeroed() };
+        cvt(unsafe {
+            liblzma_sys::lzma_stream_encoder(
                 &mut init.raw,
                 filters.inner.as_ptr(),
                 check as liblzma_sys::lzma_check,
-            ))?;
-            Ok(init)
-        }
+            )
+        })?;
+        Ok(init)
     }
 
     /// Initialize a .xz stream decoder.
