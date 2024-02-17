@@ -384,6 +384,30 @@ impl Stream {
         Ok(init)
     }
 
+    /// Initialize a decoder stream using a custom filter chain.
+    pub fn new_raw_decoder(filters: &Filters) -> Result<Stream, Error> {
+        unsafe {
+            let mut init = Stream { raw: mem::zeroed() };
+            cvt(liblzma_sys::lzma_raw_decoder(
+                &mut init.raw,
+                filters.inner.as_ptr(),
+            ))?;
+            Ok(init)
+        }
+    }
+
+    /// Initialize an encoder stream using a custom filter chain.
+    pub fn new_raw_encoder(filters: &Filters) -> Result<Stream, Error> {
+        unsafe {
+            let mut init = Stream { raw: mem::zeroed() };
+            cvt(liblzma_sys::lzma_raw_encoder(
+                &mut init.raw,
+                filters.inner.as_ptr(),
+            ))?;
+            Ok(init)
+        }
+    }
+
     /// Processes some data from input into an output buffer.
     ///
     /// This will perform the appropriate encoding or decoding operation
@@ -462,6 +486,13 @@ impl Stream {
 }
 
 impl LzmaOptions {
+    /// Creates a new blank set of options.
+    pub fn new() -> LzmaOptions {
+        LzmaOptions {
+            raw: unsafe { mem::zeroed() },
+        }
+    }
+
     /// Creates a new blank set of options for encoding.
     ///
     /// The `preset` argument is the compression level to use, typically in the
