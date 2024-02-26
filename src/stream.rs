@@ -29,7 +29,7 @@ pub struct LzmaOptions {
     raw: liblzma_sys::lzma_options_lzma,
 }
 
-/// Builder to create a multi-threaded stream encoder.
+/// Builder to create a multithreaded stream encoder.
 #[cfg(feature = "parallel")]
 pub struct MtStreamBuilder {
     raw: liblzma_sys::lzma_mt,
@@ -188,7 +188,7 @@ pub enum Error {
 }
 
 /// Possible integrity checks that can be part of a .xz stream.
-#[allow(missing_docs)] // self explanatory mostly
+#[allow(missing_docs)] // self-explanatory mostly
 #[derive(Copy, Clone)]
 pub enum Check {
     None = liblzma_sys::LZMA_CHECK_NONE as isize,
