@@ -874,6 +874,25 @@ impl Filters {
         self.inner.insert(pos, filter);
         self
     }
+
+    /// recommend a Block size for multithreaded encoding
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let dict_size = 0x40000;
+    /// let mut opts = LzmaOptions::new_preset(6).unwrap();
+    /// opts.dict_size(dict_size);
+    /// let mut filters = Filters::new();
+    /// filters.lzma2(&opts);
+    /// assert_eq!(filters.mt_block_size(), 1 << 20);
+    /// ```
+    #[cfg(feature = "parallel")]
+    #[inline]
+    pub fn mt_block_size(&self) -> u64 {
+        unsafe { liblzma_sys::lzma_mt_block_size(self.inner.as_ptr()) }
+    }
 }
 
 #[cfg(feature = "parallel")]
