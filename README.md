@@ -36,6 +36,10 @@ so you can migrate simply.
   This feature is available by enabling the `parallel` feature
 - Support compile to webassembly
 
+## Version 0.3.x breaking changes
+
+- XZ upgraded to 5.6
+
 ## License
 
 This project is licensed under either of
