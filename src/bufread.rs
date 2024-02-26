@@ -1,6 +1,5 @@
 //! I/O streams for wrapping `BufRead` types as encoders/decoders
 
-use liblzma_sys;
 use std::io;
 use std::io::prelude::*;
 
