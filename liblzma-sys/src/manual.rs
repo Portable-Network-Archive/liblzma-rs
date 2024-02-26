@@ -246,6 +246,8 @@ extern "C" {
     pub fn lzma_stream_encoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret;
     #[cfg(feature = "parallel")]
     pub fn lzma_stream_decoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret;
+    #[cfg(feature = "parallel")]
+    pub fn lzma_mt_block_size(filters: *const crate::lzma_filter) -> u64;
 
     pub fn lzma_alone_encoder(
         strm: *mut lzma_stream,
