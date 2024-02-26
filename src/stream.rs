@@ -826,6 +826,27 @@ impl Filters {
         })
     }
 
+    /// Add a filter for RISCV binaries.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let dict_size = 0x40000;
+    /// let mut opts = LzmaOptions::new_preset(6).unwrap();
+    /// opts.dict_size(dict_size);
+    /// let mut filters = Filters::new();
+    /// filters.riscv();
+    /// filters.lzma2(&opts);
+    /// ```
+    #[inline]
+    pub fn riscv(&mut self) -> &mut Filters {
+        self.push(liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_RISCV,
+            options: std::ptr::null_mut(),
+        })
+    }
+
     /// Add a filter for SPARC binaries.
     ///
     /// # Examples
