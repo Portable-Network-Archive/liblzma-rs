@@ -1,6 +1,5 @@
 //! Writer-based compression/decompression streams
 
-use liblzma_sys;
 use std::io;
 use std::io::prelude::*;
 

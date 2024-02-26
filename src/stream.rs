@@ -11,8 +11,6 @@ use std::io;
 use std::mem;
 use std::slice;
 
-use liblzma_sys;
-
 /// Representation of an in-memory LZMA encoding or decoding stream.
 ///
 /// Wraps the raw underlying `lzma_stream` type and provides the ability to
