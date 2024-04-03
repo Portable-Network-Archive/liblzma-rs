@@ -35,3 +35,23 @@ jobs:
       - name: Run build
         run: |
           cargo build --target ${{ matrix.target }} --features wasm
+
+  test_without_wasi_sdk:
+    name: Test WebAssembly
+    strategy:
+      matrix:
+        target:
+          - wasm32-unknown-unknown
+          - wasm32-wasi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: ${{ matrix.target }}
+          toolchain: stable
+      - name: Run build
+        run: |
+          cargo build --target ${{ matrix.target }} --features wasm
