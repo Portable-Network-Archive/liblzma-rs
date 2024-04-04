@@ -370,6 +370,7 @@ impl Stream {
     }
 
     /// Initialize a .lz stream decoder.
+    #[inline]
     pub fn new_lzip_decoder(memlimit: u64, flags: u32) -> Result<Self, Error> {
         let mut init = unsafe { Self::zeroed() };
         cvt(unsafe { liblzma_sys::lzma_lzip_decoder(&mut init.raw, memlimit, flags) })?;
@@ -377,6 +378,7 @@ impl Stream {
     }
 
     /// Initialize a decoder stream using a custom filter chain.
+    #[inline]
     pub fn new_raw_decoder(filters: &Filters) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -389,6 +391,7 @@ impl Stream {
     }
 
     /// Initialize an encoder stream using a custom filter chain.
+    #[inline]
     pub fn new_raw_encoder(filters: &Filters) -> Result<Stream, Error> {
         unsafe {
             let mut init = Stream { raw: mem::zeroed() };
@@ -479,6 +482,7 @@ impl Stream {
 
 impl LzmaOptions {
     /// Creates a new blank set of options.
+    #[inline]
     pub fn new() -> LzmaOptions {
         LzmaOptions {
             raw: unsafe { mem::zeroed() },
@@ -492,7 +496,7 @@ impl LzmaOptions {
     #[inline]
     pub fn new_preset(preset: u32) -> Result<LzmaOptions, Error> {
         unsafe {
-            let mut options = LzmaOptions { raw: mem::zeroed() };
+            let mut options = Self::new();
             let ret = liblzma_sys::lzma_lzma_preset(&mut options.raw, preset);
             if ret != 0 {
                 Err(Error::Program)
