@@ -1,7 +1,7 @@
 //! Reader-based compression/decompression streams
 
+use std::io;
 use std::io::prelude::*;
-use std::io::{self, BufReader};
 
 #[cfg(feature = "tokio")]
 use futures::Poll;
@@ -9,6 +9,7 @@ use futures::Poll;
 use tokio_io::{AsyncRead, AsyncWrite};
 
 use crate::bufread;
+use crate::bufread::buffered::BufReader;
 use crate::stream::Stream;
 
 /// A compression stream which wraps an uncompressed stream of data. Compressed

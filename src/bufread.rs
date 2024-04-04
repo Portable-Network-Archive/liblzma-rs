@@ -1,5 +1,7 @@
 //! I/O streams for wrapping `BufRead` types as encoders/decoders
 
+pub(crate) mod buffered;
+
 use std::io;
 use std::io::prelude::*;
 
