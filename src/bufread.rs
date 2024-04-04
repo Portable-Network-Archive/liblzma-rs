@@ -12,7 +12,7 @@ use tokio_io::{AsyncRead, AsyncWrite};
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
 
-/// An xz encoder, or compressor.
+/// A xz encoder, or compressor.
 ///
 /// This structure implements a `BufRead` interface and will read uncompressed
 /// data from an underlying stream and emit a stream of compressed data.
