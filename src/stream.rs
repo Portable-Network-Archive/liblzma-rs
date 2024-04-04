@@ -331,15 +331,9 @@ impl Stream {
     /// `TELL_IGNORE_CHECK`, or `CONCATENATED`.
     #[inline]
     pub fn new_stream_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_stream_decoder(
-                &mut init.raw,
-                memlimit,
-                flags,
-            ))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_stream_decoder(&mut init.raw, memlimit, flags) })?;
+        Ok(init)
     }
 
     /// Initialize a .lzma stream decoder.
@@ -347,26 +341,18 @@ impl Stream {
     /// The maximum memory usage can also be specified.
     #[inline]
     pub fn new_lzma_decoder(memlimit: u64) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_alone_decoder(&mut init.raw, memlimit))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_alone_decoder(&mut init.raw, memlimit) })?;
+        Ok(init)
     }
 
     /// Initialize a decoder which will choose a stream/lzma formats depending
     /// on the input stream.
     #[inline]
     pub fn new_auto_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_auto_decoder(
-                &mut init.raw,
-                memlimit,
-                flags,
-            ))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_auto_decoder(&mut init.raw, memlimit, flags) })?;
+        Ok(init)
     }
 
     /// Initialize a .lz stream decoder.
@@ -380,27 +366,17 @@ impl Stream {
     /// Initialize a decoder stream using a custom filter chain.
     #[inline]
     pub fn new_raw_decoder(filters: &Filters) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_raw_decoder(
-                &mut init.raw,
-                filters.inner.as_ptr(),
-            ))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_raw_decoder(&mut init.raw, filters.inner.as_ptr()) })?;
+        Ok(init)
     }
 
     /// Initialize an encoder stream using a custom filter chain.
     #[inline]
     pub fn new_raw_encoder(filters: &Filters) -> Result<Stream, Error> {
-        unsafe {
-            let mut init = Stream { raw: mem::zeroed() };
-            cvt(liblzma_sys::lzma_raw_encoder(
-                &mut init.raw,
-                filters.inner.as_ptr(),
-            ))?;
-            Ok(init)
-        }
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_raw_encoder(&mut init.raw, filters.inner.as_ptr()) })?;
+        Ok(init)
     }
 
     /// Processes some data from input into an output buffer.
