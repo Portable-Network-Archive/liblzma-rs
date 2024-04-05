@@ -17,7 +17,7 @@ fn main() {
     // If we're compiling for MSVC, pkg-config runs a risk of picking up MinGW
     // libraries by accident, so disable it.
     //
-    // Otherwise check the system to see if it has an lzma library already
+    // Otherwise, check the system to see if it has a lzma library already
     // installed that we can use.
     let pkg = pkg_config::Config::new()
         .atleast_version(MIN_LIBLZMA)
