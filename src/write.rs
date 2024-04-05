@@ -1,5 +1,7 @@
 //! Writer-based compression/decompression streams
 
+mod auto_finish;
+
 use std::io;
 use std::io::prelude::*;
 
@@ -11,6 +13,7 @@ use tokio_io::{try_nb, AsyncRead, AsyncWrite};
 #[cfg(feature = "parallel")]
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
+pub use auto_finish::{AutoFinishXzDecoder, AutoFinishXzEncoder};
 
 /// A compression stream which will have uncompressed data written to it and
 /// will write compressed data to an output stream.
