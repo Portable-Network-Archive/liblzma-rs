@@ -263,7 +263,18 @@ impl<W: Write> XzDecoder<W> {
         Ok(())
     }
 
-    fn try_finish(&mut self) -> io::Result<()> {
+    /// Attempt to finish this output stream, writing out final chunks of data.
+    ///
+    /// Note that this function can only be used once data has finished being
+    /// written to the output stream. After this function is called then further
+    /// calls to `write` may result in a panic.
+    ///
+    /// # Panics
+    ///
+    /// Attempts to write data to this stream may result in a panic after this
+    /// function is called.
+    #[inline]
+    pub fn try_finish(&mut self) -> io::Result<()> {
         loop {
             self.dump()?;
             let res = self.data.process_vec(&[], &mut self.buf, Action::Finish)?;
