@@ -17,6 +17,7 @@ High level Rust bindings are available in the `liblzma` crate.
 """
 categories = ["external-ffi-bindings"]
 edition = "2021"
+exclude = ["xz/.github/", "xz/tests/files/*"]
 
 [dependencies]
 libc = "0.2.67"
