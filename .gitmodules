@@ -1,3 +1,4 @@
 [submodule "liblzma-sys/xz"]
 	path = liblzma-sys/xz
 	url = https://git.tukaani.org/xz.git
+	branch = v5.6
