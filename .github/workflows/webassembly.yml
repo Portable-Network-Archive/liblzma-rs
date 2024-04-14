@@ -32,7 +32,17 @@ jobs:
         with:
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.rust }}
-      - name: Run build
+      - if: "${{ matrix.target == 'wasm32-wasi' }}"
+        name: Setup wasmtime
+        uses: bytecodealliance/actions/wasmtime/setup@v1
+        with:
+          github_token: ${{ github.token }}
+      - if: "${{ matrix.target == 'wasm32-wasi' }}"
+        name: Run test
+        run: |
+          cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
+      - if: "${{ matrix.target != 'wasm32-wasi' }}"
+        name: Run build
         run: |
           cargo build --target ${{ matrix.target }} --features wasm
 
@@ -52,6 +62,16 @@ jobs:
         with:
           target: ${{ matrix.target }}
           toolchain: stable
-      - name: Run build
+      - if: "${{ matrix.target == 'wasm32-wasi' }}"
+        name: Setup wasmtime
+        uses: bytecodealliance/actions/wasmtime/setup@v1
+        with:
+          github_token: ${{ github.token }}
+      - if: "${{ matrix.target == 'wasm32-wasi' }}"
+        name: Run test
+        run: |
+          cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
+      - if: "${{ matrix.target != 'wasm32-wasi' }}"
+        name: Run build
         run: |
           cargo build --target ${{ matrix.target }} --features wasm
