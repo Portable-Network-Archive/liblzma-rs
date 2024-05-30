@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 const SKIP_FILENAMES: &[&str] = &["crc32_small", "crc64_small"];
-const MIN_LIBLZMA: &str = "5.6.0";
+const MIN_LIBLZMA: &str = "5.6.2";
 
 fn main() {
     let target = env::var("TARGET").unwrap();
