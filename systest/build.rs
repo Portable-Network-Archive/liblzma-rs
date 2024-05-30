@@ -1,7 +1,7 @@
 use std::env;
 
 fn main() {
-    let mut cfg = ctest::TestGenerator::new();
+    let mut cfg = ctest2::TestGenerator::new();
     if let Ok(out) = env::var("DEP_LZMA_INCLUDE") {
         cfg.include(&out);
     }
