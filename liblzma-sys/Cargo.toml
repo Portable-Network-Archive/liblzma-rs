@@ -1,6 +1,6 @@
 [package]
 name = "liblzma-sys"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Alex Crichton <alex@alexcrichton.com>", "Portable-Network-Archive Developers"]
 build = "build.rs"
 links = "lzma"
