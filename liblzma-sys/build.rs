@@ -96,7 +96,7 @@ fn main() {
     // List out the WASM targets that need wasm-shim.
     // Note that Emscripten already provides its own C standard library so
     // wasm32-unknown-emscripten should not be included here.
-    let need_wasm_shim = target == "wasm32-unknown-unknown" || target == "wasm32-wasi";
+    let need_wasm_shim = target == "wasm32-unknown-unknown" || target.starts_with("wasm32-wasi");
     if need_wasm_shim {
         println!("cargo:rerun-if-changed=wasm-shim/stdlib.h");
         build.include("wasm-shim/");
