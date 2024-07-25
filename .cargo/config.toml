@@ -1,2 +1,4 @@
 [target."wasm32-wasi"]
 runner = "wasmtime"
+[target."wasm32-wasip1"]
+runner = "wasmtime"
