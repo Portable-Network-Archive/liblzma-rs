@@ -62,7 +62,10 @@
 
 #![deny(missing_docs)]
 
-use std::io::{self, prelude::*};
+use std::{
+    io::{self, prelude::*},
+    mem::MaybeUninit,
+};
 
 pub mod stream;
 
@@ -106,6 +109,74 @@ pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Resu
     Ok(())
 }
 
+/// Find the size in bytes of uncompressed data from xz file.
+#[cfg(feature = "bindgen")]
+pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
+    let mut footer = [0u8; liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize];
+
+    source.seek(io::SeekFrom::End(
+        0 - (liblzma_sys::LZMA_STREAM_HEADER_SIZE as i64),
+    ))?;
+    source.read_exact(&mut footer)?;
+
+    let lzma_stream_flags = unsafe {
+        let mut lzma_stream_flags = MaybeUninit::uninit();
+        let ret =
+            liblzma_sys::lzma_stream_footer_decode(lzma_stream_flags.as_mut_ptr(), footer.as_ptr());
+
+        if ret != liblzma_sys::lzma_ret_LZMA_OK {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "Failed to parse lzma footer",
+            ));
+        }
+
+        lzma_stream_flags.assume_init()
+    };
+
+    let index_plus_footer =
+        liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize + lzma_stream_flags.backward_size as usize;
+
+    source.seek(io::SeekFrom::End(0 - index_plus_footer as i64))?;
+
+    let buf = source
+        .bytes()
+        .take(index_plus_footer)
+        .collect::<io::Result<Vec<u8>>>()?;
+
+    let uncompressed_size = unsafe {
+        let mut i: MaybeUninit<*mut liblzma_sys::lzma_index> = MaybeUninit::uninit();
+        let mut memlimit = u64::MAX;
+        let mut in_pos = 0usize;
+
+        let ret = liblzma_sys::lzma_index_buffer_decode(
+            i.as_mut_ptr(),
+            &mut memlimit,
+            std::ptr::null(),
+            buf.as_ptr(),
+            &mut in_pos,
+            buf.len(),
+        );
+
+        if ret != liblzma_sys::lzma_ret_LZMA_OK {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                "Failed to parse lzma footer",
+            ));
+        }
+
+        let i = i.assume_init();
+
+        let uncompressed_size = liblzma_sys::lzma_index_uncompressed_size(i);
+
+        liblzma_sys::lzma_index_end(i, std::ptr::null());
+
+        uncompressed_size
+    };
+
+    Ok(uncompressed_size)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -132,6 +203,21 @@ mod tests {
             let mut d = Vec::new();
             copy_decode(&e[..], &mut d).unwrap();
             v == d
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "bindgen")]
+    fn size() {
+        quickcheck(test as fn(_) -> _);
+
+        fn test(v: Vec<u8>) -> bool {
+            let mut e = Vec::new();
+            copy_encode(&v[..], &mut e, 6).unwrap();
+
+            let s = super::uncompressed_size(std::io::Cursor::new(e)).unwrap();
+
+            (s as usize) == v.len()
         }
     }
 }
