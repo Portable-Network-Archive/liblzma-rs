@@ -105,10 +105,10 @@ impl<W: Write> XzEncoder<W> {
         self.dump()
     }
 
-    /// Consumes this encoder, flushing the output stream.
+    /// Consumes this encoder, finishing the compression stream.
     ///
-    /// This will flush the underlying data stream and then return the contained
-    /// writer if the flush succeeded.
+    /// This will finish the underlying data stream and then return the contained
+    /// writer if the finish succeeded.
     ///
     /// Note that this function may not be suitable to call in a situation where
     /// the underlying stream is an asynchronous I/O stream. To finish a stream
@@ -263,7 +263,18 @@ impl<W: Write> XzDecoder<W> {
         Ok(())
     }
 
-    fn try_finish(&mut self) -> io::Result<()> {
+    /// Attempt to finish this output stream, writing out final chunks of data.
+    ///
+    /// Note that this function can only be used once data has finished being
+    /// written to the output stream. After this function is called then further
+    /// calls to `write` may result in a panic.
+    ///
+    /// # Panics
+    ///
+    /// Attempts to write data to this stream may result in a panic after this
+    /// function is called.
+    #[inline]
+    pub fn try_finish(&mut self) -> io::Result<()> {
         loop {
             self.dump()?;
             let res = self.data.process_vec(&[], &mut self.buf, Action::Finish)?;
@@ -286,9 +297,18 @@ impl<W: Write> XzDecoder<W> {
         self.dump()
     }
 
-    /// Unwrap the underlying writer, finishing the compression stream.
+    /// Consumes this decoder, finishing the decompression stream.
+    ///
+    /// This will finish the underlying data stream and then return the contained
+    /// writer if the finish succeeded.
+    ///
+    /// Note that this function may not be suitable to call in a situation where
+    /// the underlying stream is an asynchronous I/O stream. To finish a stream
+    /// the `try_finish` (or `shutdown`) method should be used instead. To
+    /// re-acquire ownership of a stream it is safe to call this method after
+    /// `try_finish` or `shutdown` has returned `Ok`.
     #[inline]
-    pub fn finish(&mut self) -> io::Result<W> {
+    pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
         Ok(self.obj.take().unwrap())
     }
