@@ -268,8 +268,11 @@ pub const CONCATENATED: u32 = liblzma_sys::LZMA_CONCATENATED;
 impl Stream {
     #[inline]
     unsafe fn zeroed() -> Self {
-        Self { raw: mem::zeroed() }
+        Self {
+            raw: unsafe { mem::zeroed() },
+        }
     }
+
     /// Initialize .xz stream encoder using a preset number
     ///
     /// This is intended to be used by most for encoding data. The `preset`
