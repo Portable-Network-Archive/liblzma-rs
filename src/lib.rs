@@ -90,7 +90,7 @@ pub fn encode_all<R: Read>(source: R, level: u32) -> io::Result<Vec<u8>> {
     Ok(vec)
 }
 
-/// Compress all data from the given source as if using an [read::XzEncoder].
+/// Compress all data from the given source as if using a [read::XzEncoder].
 ///
 /// Compressed data will be appended to `destination`.
 pub fn copy_encode<R: Read, W: Write>(source: R, mut destination: W, level: u32) -> io::Result<()> {
@@ -98,7 +98,7 @@ pub fn copy_encode<R: Read, W: Write>(source: R, mut destination: W, level: u32)
     Ok(())
 }
 
-/// Decompress all data from the given source as if using an [read::XzDecoder].
+/// Decompress all data from the given source as if using a [read::XzDecoder].
 ///
 /// Decompressed data will be appended to `destination`.
 pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Result<()> {
