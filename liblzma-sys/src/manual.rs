@@ -28,6 +28,7 @@ pub const LZMA_OPTIONS_ERROR: lzma_ret = 8;
 pub const LZMA_DATA_ERROR: lzma_ret = 9;
 pub const LZMA_BUF_ERROR: lzma_ret = 10;
 pub const LZMA_PROG_ERROR: lzma_ret = 11;
+pub const LZMA_SEEK_NEEDED: lzma_ret = 12;
 
 pub const LZMA_RUN: lzma_action = 0;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
