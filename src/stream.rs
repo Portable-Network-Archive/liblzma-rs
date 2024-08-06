@@ -716,7 +716,7 @@ impl Filters {
         /// what you are doing.  LZMA2 is almost always a better choice.
         #[inline]
         lzma1;
-        /// Add an LZMA1 filter with properties
+        /// Add an LZMA1 filter with properties.
         #[inline]
         lzma1_properties
     );
@@ -732,7 +732,7 @@ impl Filters {
         /// middle of encoding, and some other internal improvements.
         #[inline]
         lzma2;
-        /// Add an LZMA2 filter with properties
+        /// Add an LZMA2 filter with properties.
         #[inline]
         lzma2_properties
     );
