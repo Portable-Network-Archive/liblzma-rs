@@ -729,7 +729,7 @@ impl Filters {
     /// use liblzma::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
-    /// filters.delta_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// filters.delta_properties(&[0x00]).unwrap();
     /// ```
     #[inline]
     pub fn delta_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
