@@ -664,6 +664,16 @@ impl Filters {
         })
     }
 
+    /// Add an LZMA1 filter with properties.
+    #[inline]
+    pub fn lzma1_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_LZMA1,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
     /// Add an LZMA2 filter.
     ///
     /// Usually you want this instead of LZMA1. Compared to LZMA1, LZMA2 adds
@@ -681,7 +691,54 @@ impl Filters {
         })
     }
 
-    // TODO: delta filter
+    /// Add an LZMA2 filter with properties.
+    #[inline]
+    pub fn lzma2_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_LZMA2,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
+    /// Add a DELTA filter.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let dict_size = 0x40000;
+    /// let mut opts = LzmaOptions::new_preset(6).unwrap();
+    /// opts.dict_size(dict_size);
+    /// let mut filters = Filters::new();
+    /// filters.delta();
+    /// filters.lzma2(&opts);
+    /// ```
+    #[inline]
+    pub fn delta(&mut self) -> &mut Filters {
+        self.push(liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_DELTA,
+            options: std::ptr::null_mut(),
+        })
+    }
+
+    /// Add a DELTA filter with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.delta_properties(&[0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn delta_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_DELTA,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
 
     /// Add a filter for x86 binaries.
     ///
@@ -702,6 +759,24 @@ impl Filters {
             id: liblzma_sys::LZMA_FILTER_X86,
             options: std::ptr::null_mut(),
         })
+    }
+
+    /// Add a filter for x86 binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.x86_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn x86_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_X86,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
     }
 
     /// Add a filter for PowerPC binaries.
@@ -725,6 +800,24 @@ impl Filters {
         })
     }
 
+    /// Add a filter for PowerPC binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.powerpc_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn powerpc_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_POWERPC,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
     /// Add a filter for IA-64 (itanium) binaries.
     ///
     /// # Examples
@@ -744,6 +837,24 @@ impl Filters {
             id: liblzma_sys::LZMA_FILTER_IA64,
             options: std::ptr::null_mut(),
         })
+    }
+
+    /// Add a filter for IA-64 (itanium) binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.ia64_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn ia64_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_IA64,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
     }
 
     /// Add a filter for ARM binaries.
@@ -767,6 +878,24 @@ impl Filters {
         })
     }
 
+    /// Add a filter for ARM binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.arm_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn arm_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_ARM,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
     /// Add a filter for ARM64 binaries.
     ///
     /// # Examples
@@ -788,25 +917,22 @@ impl Filters {
         })
     }
 
-    /// Add a filter for ARM-Thumb binaries.
+    /// Add a filter for ARM64 binaries with properties.
     ///
     /// # Examples
     /// ```
     /// use liblzma::stream::{Filters, LzmaOptions};
     ///
-    /// let dict_size = 0x40000;
-    /// let mut opts = LzmaOptions::new_preset(6).unwrap();
-    /// opts.dict_size(dict_size);
     /// let mut filters = Filters::new();
-    /// filters.arm_thumb();
-    /// filters.lzma2(&opts);
+    /// filters.arm64_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
     /// ```
     #[inline]
-    pub fn arm_thumb(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
+    pub fn arm64_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_ARM64,
             options: std::ptr::null_mut(),
-        })
+        };
+        self.push_with_properties(filter, properties)
     }
 
     /// Add a filter for RISCV binaries.
@@ -830,6 +956,63 @@ impl Filters {
         })
     }
 
+    /// Add a filter for RISCV binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.riscv_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn riscv_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_RISCV,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
+    /// Add a filter for ARM-Thumb binaries.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let dict_size = 0x40000;
+    /// let mut opts = LzmaOptions::new_preset(6).unwrap();
+    /// opts.dict_size(dict_size);
+    /// let mut filters = Filters::new();
+    /// filters.arm_thumb();
+    /// filters.lzma2(&opts);
+    /// ```
+    #[inline]
+    pub fn arm_thumb(&mut self) -> &mut Filters {
+        self.push(liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
+            options: std::ptr::null_mut(),
+        })
+    }
+
+    /// Add a filter for ARM-Thumb binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.arm_thumb_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn arm_thumb_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
     /// Add a filter for SPARC binaries.
     ///
     /// # Examples
@@ -851,11 +1034,48 @@ impl Filters {
         })
     }
 
+    /// Add a filter for SPARC binaries with properties.
+    ///
+    /// # Examples
+    /// ```
+    /// use liblzma::stream::{Filters, LzmaOptions};
+    ///
+    /// let mut filters = Filters::new();
+    /// filters.sparc_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
+    /// ```
+    #[inline]
+    pub fn sparc_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
+        let filter = liblzma_sys::lzma_filter {
+            id: liblzma_sys::LZMA_FILTER_SPARC,
+            options: std::ptr::null_mut(),
+        };
+        self.push_with_properties(filter, properties)
+    }
+
     #[inline]
     fn push(&mut self, filter: liblzma_sys::lzma_filter) -> &mut Filters {
         let pos = self.inner.len() - 1;
         self.inner.insert(pos, filter);
         self
+    }
+
+    #[inline]
+    fn push_with_properties(
+        &mut self,
+        mut filter: liblzma_sys::lzma_filter,
+        properties: &[u8],
+    ) -> Result<&mut Filters, Error> {
+        cvt(unsafe {
+            liblzma_sys::lzma_properties_decode(
+                &mut filter,
+                std::ptr::null(),
+                properties.as_ptr(),
+                properties.len(),
+            )
+        })?;
+        let pos = self.inner.len() - 1;
+        self.inner.insert(pos, filter);
+        Ok(self)
     }
 
     /// recommend a Block size for multithreaded encoding
