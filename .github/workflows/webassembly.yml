@@ -48,6 +48,12 @@ jobs:
         name: Run build
         run: |
           cargo build --target ${{ matrix.target }} --features wasm
+      - name: Run test
+        if: ${{ startsWith(matrix.target, 'wasm32-unknown-emscripten') }}
+        run: |
+          cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
+        env:
+          RUSTFLAGS: "-C link-args=-sINITIAL_MEMORY=128MB"
 
   test_without_wasi_sdk:
     name: Test WebAssembly
