@@ -266,11 +266,7 @@ impl<R: BufRead> Read for XzDecoder<R> {
 
             let status = ret?;
             if read > 0 || eof || buf.is_empty() {
-                if read == 0
-                    && status != Status::StreamEnd
-                    && status != Status::Ok
-                    && !buf.is_empty()
-                {
+                if read == 0 && status != Status::StreamEnd {
                     return Err(io::Error::new(
                         io::ErrorKind::UnexpectedEof,
                         "premature eof",
