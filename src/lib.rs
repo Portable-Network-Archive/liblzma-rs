@@ -122,7 +122,7 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
         let ret =
             liblzma_sys::lzma_stream_footer_decode(lzma_stream_flags.as_mut_ptr(), footer.as_ptr());
 
-        if ret != liblzma_sys::lzma_ret_LZMA_OK {
+        if ret != liblzma_sys::LZMA_OK {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "Failed to parse lzma footer",
@@ -156,7 +156,7 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
             buf.len(),
         );
 
-        if ret != liblzma_sys::lzma_ret_LZMA_OK {
+        if ret != liblzma_sys::LZMA_OK {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "Failed to parse lzma footer",
