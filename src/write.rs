@@ -1,5 +1,7 @@
 //! Writer-based compression/decompression streams
 
+mod auto_finish;
+
 use std::io;
 use std::io::prelude::*;
 
@@ -11,9 +13,12 @@ use tokio_io::{try_nb, AsyncRead, AsyncWrite};
 #[cfg(feature = "parallel")]
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
+pub use auto_finish::{AutoFinishXzDecoder, AutoFinishXzEncoder};
 
 /// A compression stream which will have uncompressed data written to it and
 /// will write compressed data to an output stream.
+/// [XzEncoder] does not do the finalization automatically, so you need to call [XzEncoder::finish] manually.
+/// If you want to automate the finalization process, please use [XzEncoder::auto_finish].
 pub struct XzEncoder<W: Write> {
     data: Stream,
     obj: Option<W>,
@@ -22,6 +27,8 @@ pub struct XzEncoder<W: Write> {
 
 /// A compression stream which will have compressed data written to it and
 /// will write uncompressed data to an output stream.
+/// [XzDecoder] does not do the finalization automatically, so you need to call [XzDecoder::finish] manually.
+/// If you want to automate the finalization process, please use [XzDecoder::auto_finish].
 pub struct XzDecoder<W: Write> {
     data: Stream,
     obj: Option<W>,
@@ -137,6 +144,13 @@ impl<W: Write> XzEncoder<W> {
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
     }
+
+    /// Convert to [AutoFinishXzEncoder] that impl [Drop] trait.
+    /// [AutoFinishXzEncoder] automatically calls [XzDecoder::try_finish] method when exiting the scope.
+    #[inline]
+    pub fn auto_finish(self) -> AutoFinishXzEncoder<W> {
+        AutoFinishXzEncoder(self)
+    }
 }
 
 impl<W: Write> Write for XzEncoder<W> {
@@ -187,15 +201,6 @@ impl<W: Read + Write> Read for XzEncoder<W> {
 
 #[cfg(feature = "tokio")]
 impl<W: AsyncRead + AsyncWrite> AsyncRead for XzEncoder<W> {}
-
-impl<W: Write> Drop for XzEncoder<W> {
-    #[inline]
-    fn drop(&mut self) {
-        if self.obj.is_some() {
-            let _ = self.try_finish();
-        }
-    }
-}
 
 impl<W: Write> XzDecoder<W> {
     /// Creates a new decoding stream which will decode into `obj` one xz stream
@@ -320,6 +325,13 @@ impl<W: Write> XzDecoder<W> {
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
     }
+
+    /// Convert to [AutoFinishXzDecoder] that impl [Drop] trait.
+    /// [AutoFinishXzDecoder] automatically calls [XzDecoder::try_finish] method when exiting the scope.
+    #[inline]
+    pub fn auto_finish(self) -> AutoFinishXzDecoder<W> {
+        AutoFinishXzDecoder(self)
+    }
 }
 
 impl<W: Write> Write for XzDecoder<W> {
@@ -362,15 +374,6 @@ impl<W: Read + Write> Read for XzDecoder<W> {
 
 #[cfg(feature = "tokio")]
 impl<W: AsyncRead + AsyncWrite> AsyncRead for XzDecoder<W> {}
-
-impl<W: Write> Drop for XzDecoder<W> {
-    #[inline]
-    fn drop(&mut self) {
-        if self.obj.is_some() {
-            let _ = self.try_finish();
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {
