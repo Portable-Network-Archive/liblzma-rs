@@ -20,10 +20,13 @@ jobs:
             container: emscripten/emsdk:latest
           - target: wasm32-unknown-unknown
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
+          - target: wasm32-unknown-unknown
           - target: wasm32-wasi
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
+          - target: wasm32-wasi
           - target: wasm32-wasip1
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
+          - target: wasm32-wasip1
 
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
@@ -54,34 +57,3 @@ jobs:
           cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
         env:
           RUSTFLAGS: "-C link-args=-sINITIAL_MEMORY=128MB"
-
-  test_without_wasi_sdk:
-    name: Test WebAssembly
-    strategy:
-      matrix:
-        target:
-          - wasm32-unknown-unknown
-          - wasm32-wasi
-          - wasm32-wasip1
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: ${{ matrix.target }}
-          toolchain: stable
-      - if: ${{ startsWith(matrix.target, 'wasm32-wasi') }}
-        name: Setup wasmtime
-        uses: bytecodealliance/actions/wasmtime/setup@v1
-        with:
-          github_token: ${{ github.token }}
-      - if: ${{ startsWith(matrix.target, 'wasm32-wasi') }}
-        name: Run test
-        run: |
-          cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
-      - if: ${{ !startsWith(matrix.target, 'wasm32-wasi') }}
-        name: Run build
-        run: |
-          cargo build --target ${{ matrix.target }} --features wasm
