@@ -157,7 +157,7 @@ pub const SCNxMAX: &[u8; 3] = b"jx\0";
 pub const LZMA_H_INTERNAL: u32 = 1;
 pub const LZMA_VERSION_MAJOR: u32 = 5;
 pub const LZMA_VERSION_MINOR: u32 = 6;
-pub const LZMA_VERSION_PATCH: u32 = 2;
+pub const LZMA_VERSION_PATCH: u32 = 3;
 pub const LZMA_VERSION_COMMIT: &[u8; 1] = b"\0";
 pub const LZMA_VERSION_STABILITY_ALPHA: u32 = 0;
 pub const LZMA_VERSION_STABILITY_BETA: u32 = 1;
@@ -190,45 +190,7 @@ pub type __enum_ty = ::std::os::raw::c_int;
 pub type __enum_ty = ::std::os::raw::c_uint;
 
 pub type wchar_t = ::std::os::raw::c_int;
-pub type __int8_t = ::std::os::raw::c_schar;
-pub type __uint8_t = ::std::os::raw::c_uchar;
-pub type __int16_t = ::std::os::raw::c_short;
-pub type __uint16_t = ::std::os::raw::c_ushort;
-pub type __int32_t = ::std::os::raw::c_int;
-pub type __uint32_t = ::std::os::raw::c_uint;
-pub type __int64_t = ::std::os::raw::c_longlong;
-pub type __uint64_t = ::std::os::raw::c_ulonglong;
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union __mbstate_t {
-    pub __mbstate8: [::std::os::raw::c_char; 128usize],
-    pub _mbstateL: ::std::os::raw::c_longlong,
-}
-#[test]
-fn bindgen_test_layout___mbstate_t() {
-    const UNINIT: ::std::mem::MaybeUninit<__mbstate_t> = ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<__mbstate_t>(),
-        128usize,
-        "Size of __mbstate_t"
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__mbstate_t>(),
-        8usize,
-        "Alignment of __mbstate_t"
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).__mbstate8) as usize - ptr as usize },
-        0usize,
-        "Offset of field: __mbstate_t::__mbstate8"
-    );
-    assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr)._mbstateL) as usize - ptr as usize },
-        0usize,
-        "Offset of field: __mbstate_t::_mbstateL"
-    );
-}
+pub type max_align_t = f64;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _opaque_pthread_attr_t {
