@@ -83,10 +83,8 @@ impl<W: Write> XzEncoder<W> {
     }
 
     fn dump(&mut self) -> io::Result<()> {
-        while !self.buf.is_empty() {
-            let n = self.obj.as_mut().unwrap().write(&self.buf)?;
-            self.buf.drain(..n);
-        }
+        self.obj.as_mut().unwrap().write_all(&self.buf)?;
+        self.buf.clear();
         Ok(())
     }
 
@@ -270,10 +268,8 @@ impl<W: Write> XzDecoder<W> {
     }
 
     fn dump(&mut self) -> io::Result<()> {
-        if !self.buf.is_empty() {
-            self.obj.as_mut().unwrap().write_all(&self.buf)?;
-            self.buf.clear();
-        }
+        self.obj.as_mut().unwrap().write_all(&self.buf)?;
+        self.buf.clear();
         Ok(())
     }
 
