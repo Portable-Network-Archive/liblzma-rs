@@ -60,6 +60,7 @@
 //! time to perform I/O. If I/O streams are flushed before drop, however, then
 //! these operations will be a noop.
 
+#![doc(html_root_url = "https://docs.rs/liblzma/0.3.5")]
 #![deny(missing_docs)]
 
 use std::io::{self, prelude::*};
