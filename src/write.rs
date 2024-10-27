@@ -105,10 +105,10 @@ impl<W: Write> XzEncoder<W> {
         self.dump()
     }
 
-    /// Consumes this encoder, flushing the output stream.
+    /// Consumes this encoder, finishing the compression stream.
     ///
-    /// This will flush the underlying data stream and then return the contained
-    /// writer if the flush succeeded.
+    /// This will finish the underlying data stream and then return the contained
+    /// writer if the finish succeeded.
     ///
     /// Note that this function may not be suitable to call in a situation where
     /// the underlying stream is an asynchronous I/O stream. To finish a stream
