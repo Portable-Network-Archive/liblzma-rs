@@ -17,6 +17,8 @@ pub use auto_finish::{AutoFinishXzDecoder, AutoFinishXzEncoder};
 
 /// A compression stream which will have uncompressed data written to it and
 /// will write compressed data to an output stream.
+/// [XzEncoder] will no longer perform the finalization automatically in the next miner release, so you need to call [XzEncoder::finish] manually.
+/// If you want to automate the finalization process, please use [XzEncoder::auto_finish].
 pub struct XzEncoder<W: Write> {
     data: Stream,
     obj: Option<W>,
@@ -25,6 +27,8 @@ pub struct XzEncoder<W: Write> {
 
 /// A compression stream which will have compressed data written to it and
 /// will write uncompressed data to an output stream.
+/// [XzDecoder] will no longer perform the finalization automatically in the next miner release, so you need to call [XzDecoder::finish] manually.
+/// If you want to automate the finalization process, please use [XzDecoder::auto_finish].
 pub struct XzDecoder<W: Write> {
     data: Stream,
     obj: Option<W>,
@@ -139,6 +143,13 @@ impl<W: Write> XzEncoder<W> {
     #[inline]
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
+    }
+
+    /// Convert to [AutoFinishXzEncoder] that impl [Drop] trait.
+    /// [AutoFinishXzEncoder] automatically calls [XzDecoder::try_finish] method when exiting the scope.
+    #[inline]
+    pub fn auto_finish(self) -> AutoFinishXzEncoder<W> {
+        AutoFinishXzEncoder(self)
     }
 }
 
@@ -322,6 +333,13 @@ impl<W: Write> XzDecoder<W> {
     #[inline]
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
+    }
+
+    /// Convert to [AutoFinishXzDecoder] that impl [Drop] trait.
+    /// [AutoFinishXzDecoder] automatically calls [XzDecoder::try_finish] method when exiting the scope.
+    #[inline]
+    pub fn auto_finish(self) -> AutoFinishXzDecoder<W> {
+        AutoFinishXzDecoder(self)
     }
 }
 
