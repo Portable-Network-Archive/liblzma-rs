@@ -297,9 +297,18 @@ impl<W: Write> XzDecoder<W> {
         self.dump()
     }
 
-    /// Unwrap the underlying writer, finishing the compression stream.
+    /// Consumes this decoder, finishing the decompression stream.
+    ///
+    /// This will finish the underlying data stream and then return the contained
+    /// writer if the finish succeeded.
+    ///
+    /// Note that this function may not be suitable to call in a situation where
+    /// the underlying stream is an asynchronous I/O stream. To finish a stream
+    /// the `try_finish` (or `shutdown`) method should be used instead. To
+    /// re-acquire ownership of a stream it is safe to call this method after
+    /// `try_finish` or `shutdown` has returned `Ok`.
     #[inline]
-    pub fn finish(&mut self) -> io::Result<W> {
+    pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
         Ok(self.obj.take().unwrap())
     }
