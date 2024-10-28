@@ -102,7 +102,9 @@ fn main() {
     // wasm32-unknown-emscripten should not be included here.
     let need_wasm_shim = target == "wasm32-unknown-unknown" || target.starts_with("wasm32-wasi");
     if need_wasm_shim {
+        println!("cargo:rerun-if-changed=wasm-shim/assert.h");
         println!("cargo:rerun-if-changed=wasm-shim/stdlib.h");
+        println!("cargo:rerun-if-changed=wasm-shim/string.h");
         build.include("wasm-shim/");
     }
 
