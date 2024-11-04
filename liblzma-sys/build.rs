@@ -87,6 +87,18 @@ fn main() {
             build.flag("-pthread");
         }
     }
+    if cfg!(feature = "fat-lto") {
+        build.flag_if_supported("-flto");
+    } else if cfg!(feature = "thin-lto") {
+        // find the first flag in `flags` that is supported and add that to.
+        let flags = ["-flto=thin", "-flto"];
+        let option = flags
+            .into_iter()
+            .find(|flag| build.is_flag_supported(flag).unwrap_or_default());
+        if let Some(flag) = option {
+            build.flag(flag);
+        }
+    }
     if want_parallel {
         build.define("LZMA_SYS_ENABLE_THREADS", "1");
     }
