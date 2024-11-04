@@ -45,5 +45,10 @@ parallel = ["liblzma-sys/parallel", "num_cpus"]
 bindgen = ["liblzma-sys/bindgen"]
 wasm = ["liblzma-sys/wasm"]
 
+# These two are for cross-language LTO.
+# Will only work if `clang` is used to build the C library.
+fat-lto = ["liblzma-sys/fat-lto"] # Enable fat-lto, will override thin-lto if specified
+thin-lto = ["liblzma-sys/thin-lto"] # Enable thin-lto, will fall back to fat-lto if not supported
+
 [package.metadata.docs.rs]
 features = ["tokio-io", "futures", "parallel"]
