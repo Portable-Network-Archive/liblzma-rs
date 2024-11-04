@@ -32,3 +32,8 @@ static = []
 bindgen = []
 parallel = []
 wasm = ["static", "bindgen"]
+
+# These two are for cross-language LTO.
+# Will only work if `clang` is used to build the C library.
+fat-lto = [] # Enable fat-lto, will override thin-lto if specified
+thin-lto = [] # Enable thin-lto, will fall back to fat-lto if not supported
