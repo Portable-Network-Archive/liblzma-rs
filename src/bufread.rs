@@ -92,7 +92,7 @@ impl<R> XzEncoder<R> {
     }
 
     /// Returns the number of bytes produced by the compressor
-    /// (e.g. the number of bytes read from this stream)
+    /// (e.g., the number of bytes read from this stream)
     ///
     /// Note that, due to buffering, this only bears any relation to
     /// total_in() when the compressor chooses to flush its data
@@ -106,7 +106,7 @@ impl<R> XzEncoder<R> {
     }
 
     /// Returns the number of bytes consumed by the compressor
-    /// (e.g. the number of bytes read from the underlying stream)
+    /// (e.g., the number of bytes read from the underlying stream)
     #[inline]
     pub fn total_in(&self) -> u64 {
         self.data.total_in()
