@@ -1,6 +1,6 @@
 [target."wasm32-wasi"]
-runner = "wasmtime"
+runner = ["wasmtime", "--dir", "."]
 [target."wasm32-wasip1"]
-runner = "wasmtime"
+runner = ["wasmtime", "--dir", "."]
 [target.wasm32-unknown-emscripten]
 runner = "node"
