@@ -4,3 +4,5 @@ runner = ["wasmtime", "--dir", "."]
 runner = ["wasmtime", "--dir", "."]
 [target.wasm32-unknown-emscripten]
 runner = "node"
+[target.wasm32-unknown-unknown]
+runner = "wasm-bindgen-test-runner"
