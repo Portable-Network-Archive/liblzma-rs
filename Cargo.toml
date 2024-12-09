@@ -34,6 +34,9 @@ getrandom = { version = "0.2", features = ["js"] }
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 tokio-core = "0.1.17"
 
+[target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dev-dependencies]
+wasm-bindgen-test = "0.3"
+
 [features]
 default = ["bindgen"]
 tokio = ["tokio-io", "futures"]
