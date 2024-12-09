@@ -13,7 +13,6 @@ jobs:
         target: 
           - wasm32-unknown-emscripten
           - wasm32-unknown-unknown
-          - wasm32-wasi
           - wasm32-wasip1
         include:
           - target: wasm32-unknown-emscripten
@@ -21,9 +20,6 @@ jobs:
           - target: wasm32-unknown-unknown
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
           - target: wasm32-unknown-unknown
-          - target: wasm32-wasi
-            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
-          - target: wasm32-wasi
           - target: wasm32-wasip1
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
           - target: wasm32-wasip1
