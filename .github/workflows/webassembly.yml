@@ -42,7 +42,7 @@ jobs:
       - if: ${{ startsWith(matrix.target, 'wasm32-wasi') }}
         name: Run test
         run: |
-          cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
+          cargo test --target ${{ matrix.target }} --features wasm
       - if: ${{ !startsWith(matrix.target, 'wasm32-wasi') }}
         name: Run build
         run: |
