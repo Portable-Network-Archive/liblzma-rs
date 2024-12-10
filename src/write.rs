@@ -188,15 +188,6 @@ impl<W: Read + Write> Read for XzEncoder<W> {
 #[cfg(feature = "tokio")]
 impl<W: AsyncRead + AsyncWrite> AsyncRead for XzEncoder<W> {}
 
-impl<W: Write> Drop for XzEncoder<W> {
-    #[inline]
-    fn drop(&mut self) {
-        if self.obj.is_some() {
-            let _ = self.try_finish();
-        }
-    }
-}
-
 impl<W: Write> XzDecoder<W> {
     /// Creates a new decoding stream which will decode into `obj` one xz stream
     /// from the input written to it.
@@ -362,15 +353,6 @@ impl<W: Read + Write> Read for XzDecoder<W> {
 
 #[cfg(feature = "tokio")]
 impl<W: AsyncRead + AsyncWrite> AsyncRead for XzDecoder<W> {}
-
-impl<W: Write> Drop for XzDecoder<W> {
-    #[inline]
-    fn drop(&mut self) {
-        if self.obj.is_some() {
-            let _ = self.try_finish();
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {
