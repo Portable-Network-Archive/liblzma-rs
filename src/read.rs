@@ -252,6 +252,8 @@ mod tests {
     use quickcheck::quickcheck;
     use rand::{thread_rng, Rng};
     use std::iter;
+    #[cfg(all(target_family = "wasm", target_os = "unknown"))]
+    use wasm_bindgen_test::wasm_bindgen_test as test;
 
     #[test]
     fn smoke() {
