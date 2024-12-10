@@ -5,6 +5,7 @@ jobs:
   test:
     name: Test WebAssembly
     strategy:
+      fail-fast: false
       matrix:
         rust:
           - stable
