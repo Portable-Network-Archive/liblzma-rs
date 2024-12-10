@@ -10,7 +10,7 @@ jobs:
           - stable
           - beta
           - nightly
-        target: 
+        target:
           - wasm32-unknown-emscripten
           - wasm32-unknown-unknown
           - wasm32-wasip1
@@ -18,11 +18,9 @@ jobs:
           - target: wasm32-unknown-emscripten
             container: emscripten/emsdk:latest
           - target: wasm32-unknown-unknown
-            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
-          - target: wasm32-unknown-unknown
+            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-22
           - target: wasm32-wasip1
-            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-20
-          - target: wasm32-wasip1
+            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-22
 
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
@@ -43,10 +41,12 @@ jobs:
         name: Run test
         run: |
           cargo test --target ${{ matrix.target }} --features wasm
-      - if: ${{ !startsWith(matrix.target, 'wasm32-wasi') }}
-        name: Run build
+      - if: ${{ endsWith(matrix.target, 'unknown') }}
+        name: Run test
         run: |
-          cargo build --target ${{ matrix.target }} --features wasm
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+          cargo binstall -y --force wasm-bindgen-cli
+          cargo test --target ${{ matrix.target }} --features wasm --release
       - name: Run test
         if: ${{ startsWith(matrix.target, 'wasm32-unknown-emscripten') }}
         run: |
