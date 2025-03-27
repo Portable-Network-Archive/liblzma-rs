@@ -42,23 +42,12 @@
 //!
 //! # Async I/O
 //!
-//! This crate optionally can support async I/O streams with the Tokio stack via
-//! the `tokio` feature of this crate:
+//! Dropped `tokio` support since 0.4.0.
+//! If you need to use async I/O, use `async-compression` crate with `lzma` feature flag.
 //!
 //! ```toml
-//! liblzma = { version = "0.3", features = ["tokio"] }
+//! async-compression = { version = "0.4", features = ["lzma"] }
 //! ```
-//!
-//! All methods are internally capable of working with streams that may return
-//! `ErrorKind::WouldBlock` when they're not ready to perform the particular
-//! operation.
-//!
-//! Note that care needs to be taken when using these objects, however. The
-//! Tokio runtime, in particular, requires that data is fully flushed before
-//! dropping streams. For compatibility with blocking streams all streams are
-//! flushed/written when they are dropped, and this is not always a suitable
-//! time to perform I/O. If I/O streams are flushed before drop, however, then
-//! these operations will be a noop.
 
 #![doc(html_root_url = "https://docs.rs/liblzma/0.3.6")]
 #![deny(missing_docs)]

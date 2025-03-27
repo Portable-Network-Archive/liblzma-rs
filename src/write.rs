@@ -5,11 +5,6 @@ mod auto_finish;
 use std::io;
 use std::io::prelude::*;
 
-#[cfg(feature = "tokio")]
-use futures::Poll;
-#[cfg(feature = "tokio")]
-use tokio_io::{try_nb, AsyncRead, AsyncWrite};
-
 #[cfg(feature = "parallel")]
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
@@ -182,23 +177,12 @@ impl<W: Write> Write for XzEncoder<W> {
     }
 }
 
-#[cfg(feature = "tokio")]
-impl<W: AsyncWrite> AsyncWrite for XzEncoder<W> {
-    fn shutdown(&mut self) -> Poll<(), io::Error> {
-        try_nb!(self.try_finish());
-        self.get_mut().shutdown()
-    }
-}
-
 impl<W: Read + Write> Read for XzEncoder<W> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.get_mut().read(buf)
     }
 }
-
-#[cfg(feature = "tokio")]
-impl<W: AsyncRead + AsyncWrite> AsyncRead for XzEncoder<W> {}
 
 impl<W: Write> Drop for XzEncoder<W> {
     #[inline]
@@ -362,23 +346,12 @@ impl<W: Write> Write for XzDecoder<W> {
     }
 }
 
-#[cfg(feature = "tokio")]
-impl<W: AsyncWrite> AsyncWrite for XzDecoder<W> {
-    fn shutdown(&mut self) -> Poll<(), io::Error> {
-        try_nb!(self.try_finish());
-        self.get_mut().shutdown()
-    }
-}
-
 impl<W: Read + Write> Read for XzDecoder<W> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.get_mut().read(buf)
     }
 }
-
-#[cfg(feature = "tokio")]
-impl<W: AsyncRead + AsyncWrite> AsyncRead for XzDecoder<W> {}
 
 impl<W: Write> Drop for XzDecoder<W> {
     #[inline]

@@ -57,20 +57,14 @@ jobs:
         cargo test --no-default-features
         cargo clean -p liblzma -p liblzma-sys
     - run: |
-        cargo test --features tokio
-        cargo clean -p liblzma -p liblzma-sys
-    - run: |
         cargo test --features parallel
         cargo clean -p liblzma -p liblzma-sys
     - run: |
         cargo test --features bindgen
         cargo clean -p liblzma -p liblzma-sys
-    - run: |
-        cargo test --features tokio parallel
-        cargo clean -p liblzma -p liblzma-sys
     # thin-lto and fat-lto feature required use clang as a linker, but linux default linker is gcc. so exclude thin-lto and fat-lto.
     - run: |
-        cargo test --features tokio,parallel,static
+        cargo test --features parallel,static
         cargo clean -p liblzma -p liblzma-sys
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
     - run: |
