@@ -20,8 +20,6 @@ members = ["systest"]
 
 [dependencies]
 liblzma-sys = { path = "liblzma-sys", version = "0.3.13", default-features = false }
-tokio-io = { version = "0.1.12", optional = true }
-futures = { version = "0.1.26", optional = true }
 num_cpus = { version = "1.16.0", optional = true }
 
 [dev-dependencies]
@@ -31,15 +29,11 @@ quickcheck = "1.0.1"
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 getrandom = { version = "0.2", features = ["js"] }
 
-[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-tokio-core = "0.1.17"
-
 [target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dev-dependencies]
 wasm-bindgen-test = "0.3"
 
 [features]
 default = ["bindgen"]
-tokio = ["tokio-io", "futures"]
 static = ["liblzma-sys/static"]
 parallel = ["liblzma-sys/parallel", "num_cpus"]
 bindgen = ["liblzma-sys/bindgen"]
@@ -51,4 +45,4 @@ fat-lto = ["liblzma-sys/fat-lto"] # Enable fat-lto, will override thin-lto if sp
 thin-lto = ["liblzma-sys/thin-lto"] # Enable thin-lto, will fall back to fat-lto if not supported
 
 [package.metadata.docs.rs]
-features = ["tokio-io", "futures", "parallel"]
+features = ["parallel"]
