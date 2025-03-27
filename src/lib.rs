@@ -28,7 +28,7 @@
 //! library is not required at runtime:
 //!
 //! ```toml
-//! liblzma = { version = "0.3", features = ["static"] }
+//! liblzma = { version = "0.4", features = ["static"] }
 //! ```
 //!
 //! # Multithreading
@@ -37,7 +37,7 @@
 //! feature of this crate:
 //!
 //! ```toml
-//! liblzma = { version = "0.3", features = ["parallel"] }
+//! liblzma = { version = "0.4", features = ["parallel"] }
 //! ```
 //!
 //! # Async I/O
@@ -49,7 +49,7 @@
 //! async-compression = { version = "0.4", features = ["lzma"] }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/liblzma/0.3.6")]
+#![doc(html_root_url = "https://docs.rs/liblzma/0.4.0")]
 #![deny(missing_docs)]
 
 use std::io::{self, prelude::*};
