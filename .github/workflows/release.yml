@@ -24,9 +24,7 @@ jobs:
           echo "version is: ${{ env.VERSION }}"
       - name: Create GitHub release
         id: release
-        uses: actions/create-release@v1
+        run: |
+          gh release create ${{ env.VERSION }} --verify-tag --title ${{ env.VERSION }} --draft --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.VERSION }}
-          release_name: ${{ env.VERSION }}
