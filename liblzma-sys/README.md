@@ -36,11 +36,15 @@ so you can migrate simply.
 - XZ upgraded to 5.4
 - Multithreading is disabled by default.
   This feature is available by enabling the `parallel` feature
-- Support compile to webassembly
+- Support for compiling to WebAssembly
 
 ## Version 0.3.x breaking changes
 
 - XZ upgraded to 5.6
+
+## Version 0.4.x breaking changes
+
+- XZ upgraded to 5.8
 
 ## License
 
