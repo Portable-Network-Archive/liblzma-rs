@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 
-const SKIP_FILENAMES: &[&str] = &["crc32_small", "crc64_small"];
+const SKIP_FILENAMES: &[&str] = &["crc32_small", "crc64_small", "crc_clmul_consts_gen"];
 const MIN_LIBLZMA: &str = "5.8.0";
 
 fn main() {
