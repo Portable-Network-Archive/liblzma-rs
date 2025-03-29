@@ -13,6 +13,7 @@ in-memory encoding/decoding. forked from xz2.
 """
 categories = ["compression", "api-bindings"]
 edition = "2021"
+rust-version = "1.60"
 exclude = [".github/"]
 
 [workspace]
