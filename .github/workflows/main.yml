@@ -10,6 +10,8 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            rust: '1.60' # msrv
+          - os: ubuntu-latest
             rust: stable
           - os: ubuntu-latest
             rust: stable
@@ -53,6 +55,10 @@ jobs:
       if: matrix.static == 'yes'
       run: echo LZMA_API_STATIC=1 >> $GITHUB_ENV
       shell: bash
+    - name: copy Cargo.lock for msrv check
+      if: matrix.rust == '1.60'
+      run: |
+        cp Cargo.lock.msrv Cargo.lock
     - run: |
         cargo test --no-default-features
         cargo clean -p liblzma -p liblzma-sys
