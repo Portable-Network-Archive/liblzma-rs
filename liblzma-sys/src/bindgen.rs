@@ -3,7 +3,7 @@
 pub const LZMA_H_INTERNAL: u32 = 1;
 pub const LZMA_VERSION_MAJOR: u32 = 5;
 pub const LZMA_VERSION_MINOR: u32 = 8;
-pub const LZMA_VERSION_PATCH: u32 = 0;
+pub const LZMA_VERSION_PATCH: u32 = 1;
 pub const LZMA_VERSION_COMMIT: &[u8; 1] = b"\0";
 pub const LZMA_VERSION_STABILITY_ALPHA: u32 = 0;
 pub const LZMA_VERSION_STABILITY_BETA: u32 = 1;
