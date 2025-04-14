@@ -39,6 +39,7 @@ static = ["liblzma-sys/static"]
 parallel = ["liblzma-sys/parallel", "num_cpus"]
 bindgen = ["liblzma-sys/bindgen"]
 wasm = ["liblzma-sys/wasm"]
+uncheck_liblzma_version = ["liblzma-sys/uncheck_liblzma_version"] # Disables version checking for the system-installed liblzma. This is not recommended under normal circumstances.
 
 # These two are for cross-language LTO.
 # Will only work if `clang` is used to build the C library.
