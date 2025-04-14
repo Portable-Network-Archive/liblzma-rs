@@ -19,9 +19,12 @@ fn main() {
     //
     // Otherwise, check the system to see if it has a lzma library already
     // installed that we can use.
-    let pkg = pkg_config::Config::new()
-        .atleast_version(MIN_LIBLZMA)
-        .probe("liblzma");
+    let mut config = pkg_config::Config::new();
+    // Skip liblzma version check if `uncheck_liblzma_version` feature flag enabled.
+    if !cfg!(feature = "uncheck_liblzma_version") {
+        config.atleast_version(MIN_LIBLZMA);
+    }
+    let pkg = config.probe("liblzma");
     if !want_static && !msvc && pkg.is_ok() {
         return;
     }

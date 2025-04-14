@@ -33,6 +33,7 @@ static = []
 bindgen = []
 parallel = []
 wasm = ["static", "bindgen"]
+uncheck_liblzma_version = [] # Disables version checking for the system-installed liblzma. This is not recommended under normal circumstances.
 
 # These two are for cross-language LTO.
 # Will only work if `clang` is used to build the C library.
