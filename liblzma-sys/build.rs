@@ -24,9 +24,12 @@ fn main() {
     if !cfg!(feature = "uncheck_liblzma_version") {
         config.atleast_version(MIN_LIBLZMA);
     }
-    let pkg = config.probe("liblzma");
-    if !want_static && !msvc && pkg.is_ok() {
-        return;
+    if !want_static && !msvc {
+        let pkg = config.probe("liblzma");
+
+        if pkg.is_ok() {
+            return;
+        }
     }
 
     let want_parallel = cfg!(feature = "parallel");
