@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/liblzma-sys/0.4.3")]
+#![doc(html_root_url = "https://docs.rs/liblzma-sys/0.4.4")]
 #![allow(bad_style)]
 
 #[cfg(feature = "bindgen")]
