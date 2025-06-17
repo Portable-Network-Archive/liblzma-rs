@@ -111,6 +111,10 @@ impl<R> XzEncoder<R> {
 impl<R: BufRead> Read for XzEncoder<R> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        if buf.is_empty() {
+            return Ok(0);
+        }
+
         loop {
             let (read, consumed, eof, ret);
             {
@@ -130,7 +134,7 @@ impl<R: BufRead> Read for XzEncoder<R> {
             // If we haven't ready any data and we haven't hit EOF yet, then we
             // need to keep asking for more data because if we return that 0
             // bytes of data have been read then it will be interpreted as EOF.
-            if read == 0 && !eof && !buf.is_empty() {
+            if read == 0 && !eof {
                 continue;
             }
             return Ok(read);
@@ -233,6 +237,10 @@ impl<R> XzDecoder<R> {
 impl<R: BufRead> Read for XzDecoder<R> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        if buf.is_empty() {
+            return Ok(0);
+        }
+
         loop {
             let (read, consumed, eof, ret);
             {
@@ -249,8 +257,8 @@ impl<R: BufRead> Read for XzDecoder<R> {
             self.obj.consume(consumed);
 
             let status = ret?;
-            if read > 0 || eof || buf.is_empty() {
-                if read == 0 && status != Status::StreamEnd && !buf.is_empty() {
+            if read > 0 || eof || status == Status::StreamEnd {
+                if read == 0 && status != Status::StreamEnd {
                     return Err(io::Error::new(
                         io::ErrorKind::UnexpectedEof,
                         "premature eof",

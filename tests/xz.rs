@@ -47,7 +47,9 @@ fn test_good(data: &[u8]) {
 
 fn test_bad(data: &[u8]) {
     let mut ret = Vec::new();
-    assert!(read::XzDecoder::new(data).read_to_end(&mut ret).is_err());
+    let stream = stream::Stream::new_stream_decoder(u64::MAX, stream::CONCATENATED).unwrap();
+    let result = read::XzDecoder::new_stream(data, stream).read_to_end(&mut ret);
+    assert!(result.is_err(), "{result:?}");
     let mut w = write::XzDecoder::new(ret);
     assert!(w.write_all(data).is_err() || w.finish().is_err());
 }
