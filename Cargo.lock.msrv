@@ -205,7 +205,7 @@ checksum = "eb147597cdf94ed43ab7a9038716637d2d1bf2bc571da995d0028dec06bd3018"
 
 [[package]]
 name = "liblzma"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "getrandom 0.2.5",
  "liblzma-sys",
