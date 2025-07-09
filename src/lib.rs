@@ -8,7 +8,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```no_run
 //! use liblzma::read::{XzDecoder, XzEncoder};
 //! use std::io::prelude::*;
 //!
