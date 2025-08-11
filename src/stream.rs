@@ -1,7 +1,7 @@
 //! Raw in-memory LZMA streams.
 //!
-//! The `Stream` type exported by this module is the primary type which performs
-//! encoding/decoding of LZMA streams. Each `Stream` is either an encoder or
+//! The [`Stream`] type in this module is the primary type which performs
+//! encoding/decoding of LZMA streams. Each [`Stream`] is either an encoder or
 //! decoder and processes data in a streaming fashion.
 
 use std::collections::LinkedList;
@@ -42,13 +42,7 @@ pub struct Filters {
     lzma_opts: LinkedList<liblzma_sys::lzma_options_lzma>,
 }
 
-/// The `action` argument for `process`,
-///
-/// After the first use of SyncFlush, FullFlush, FullBarrier, or Finish, the
-/// same `action' must is used until `process` returns `Status::StreamEnd`.
-/// Also, the amount of input must not be modified by the application until
-/// `process` returns `Status::StreamEnd`. Changing the `action' or modifying
-/// the amount of input will make `process` return `Error::Program`.
+/// The `action` argument for [`Stream::process`],
 #[derive(Copy, Clone)]
 pub enum Action {
     /// Continue processing
@@ -56,7 +50,7 @@ pub enum Action {
     /// When encoding, encode as much input as possible. Some internal buffering
     /// will probably be done (depends on the filter chain in use), which causes
     /// latency: the input used won't usually be decodeable from the output of
-    /// the same `process` call.
+    /// the same [`Stream::process`] call.
     ///
     /// When decoding, decode as much input as possible and produce as much
     /// output as possible.
@@ -70,7 +64,7 @@ pub enum Action {
     /// for example for communication over network.
     ///
     /// Only some filters support `SyncFlush`. Trying to use `SyncFlush` with
-    /// filters that don't support it will make `process` return
+    /// filters that don't support it will make [`Stream::process`] return
     /// `Error::Options`. For example, LZMA1 doesn't support `SyncFlush` but
     /// LZMA2 does.
     ///
@@ -85,7 +79,7 @@ pub enum Action {
     /// Finish encoding of the current block.
     ///
     /// All the input data going to the current block must have been given to
-    /// the encoder. Call `process` with `FullFlush` until it returns
+    /// the encoder. Call [`Stream::process`] with `FullFlush` until it returns
     /// `Status::StreamEnd`. Then continue normally with `Run` or finish the
     /// Stream with `Finish`.
     ///
@@ -98,13 +92,13 @@ pub enum Action {
     ///
     /// This is like `FullFlush` except that this doesn't necessarily wait until
     /// all the input has been made available via the output buffer. That is,
-    /// `process` might return `Status::StreamEnd` as soon as all the input has
+    /// [`Stream::process`] might return `Status::StreamEnd` as soon as all the input has
     /// been consumed.
     ///
     /// `FullBarrier` is useful with a threaded encoder if one wants to split
     /// the .xz Stream into blocks at specific offsets but doesn't care if the
     /// output isn't flushed immediately. Using `FullBarrier` allows keeping the
-    /// threads busy while `FullFlush` would make `process` wait until all the
+    /// threads busy while `FullFlush` would make [`Stream::process`] wait until all the
     /// threads have finished until more data could be passed to the encoder.
     ///
     /// With a `Stream` initialized with the single-threaded
@@ -115,7 +109,7 @@ pub enum Action {
     /// Finish the current operation
     ///
     /// All the input data must have been given to the encoder (the last bytes
-    /// can still be pending in next_in). Call `process` with `Finish` until it
+    /// can still be pending in next_in). Call [`Stream::process`] with `Finish` until it
     /// returns `Status::StreamEnd`. Once `Finish` has been used, the amount of
     /// input must no longer be changed by the application.
     ///
@@ -126,7 +120,7 @@ pub enum Action {
     Finish = liblzma_sys::LZMA_FINISH as isize,
 }
 
-/// Return value of a `process` operation.
+/// Return value of a [`Stream::process`] operation.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Status {
     /// Operation completed successfully.
@@ -149,7 +143,7 @@ pub enum Status {
     /// Processing can be continued normally by providing more input and/or more
     /// output space, if possible.
     ///
-    /// Typically the first call to `process` that can do no progress returns
+    /// Typically the first call to [`Stream::process`] that can do no progress returns
     /// `Ok` instead of `MemNeeded`. Only the second consecutive call doing no
     /// progress will return `MemNeeded`.
     MemNeeded,
@@ -244,16 +238,16 @@ pub enum MatchFinder {
     BinaryTree4 = liblzma_sys::LZMA_MF_BT4 as isize,
 }
 
-/// A flag passed when initializing a decoder, causes `process` to return
-/// `Status::GetCheck` as soon as the integrity check is known.
+/// A flag passed when initializing a decoder, causes [`Stream::process`] to return
+/// [`Status::GetCheck`] as soon as the integrity check is known.
 pub const TELL_ANY_CHECK: u32 = liblzma_sys::LZMA_TELL_ANY_CHECK;
 
-/// A flag passed when initializing a decoder, causes `process` to return
-/// `Error::NoCheck` if the stream being decoded has no integrity check.
+/// A flag passed when initializing a decoder, causes [`Stream::process`] to return
+/// [`Error::NoCheck`] if the stream being decoded has no integrity check.
 pub const TELL_NO_CHECK: u32 = liblzma_sys::LZMA_TELL_NO_CHECK;
 
-/// A flag passed when initializing a decoder, causes `process` to return
-/// `Error::UnsupportedCheck` if the stream being decoded has an integrity check
+/// A flag passed when initializing a decoder, causes [`Stream::process`] to return
+/// [`Error::UnsupportedCheck`] if the stream being decoded has an integrity check
 /// that cannot be verified by this build of liblzma.
 pub const TELL_UNSUPPORTED_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
 
@@ -265,14 +259,8 @@ pub const IGNORE_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
 /// multiple concatenated xz files.
 pub const CONCATENATED: u32 = liblzma_sys::LZMA_CONCATENATED;
 
+/// Encoder-related functions
 impl Stream {
-    #[inline]
-    unsafe fn zeroed() -> Self {
-        Self {
-            raw: unsafe { mem::zeroed() },
-        }
-    }
-
     /// Initialize .xz stream encoder using a preset number
     ///
     /// This is intended to be used by most for encoding data. The `preset`
@@ -300,9 +288,8 @@ impl Stream {
     /// legacy LZMA tools such as LZMA Utils 4.32.x. Moving to the .xz format
     /// (the `new_easy_encoder` function) is strongly recommended.
     ///
-    /// The valid action values for `process` are `Run` and `Finish`. No kind
-    /// of flushing is supported, because the file format doesn't make it
-    /// possible.
+    /// The valid action values for [`Stream::process`] are [`Action::Run`] and [`Action::Finish`].
+    /// No flushing is supported, because the file format doesn't support it.
     #[inline]
     pub fn new_lzma_encoder(options: &LzmaOptions) -> Result<Stream, Error> {
         let mut init = unsafe { Stream::zeroed() };
@@ -327,11 +314,31 @@ impl Stream {
         Ok(init)
     }
 
+    /// Initialize an encoder stream using a custom filter chain.
+    #[inline]
+    pub fn new_raw_encoder(filters: &Filters) -> Result<Stream, Error> {
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_raw_encoder(&mut init.raw, filters.inner.as_ptr()) })?;
+        Ok(init)
+    }
+}
+
+/// Decoder-related functions
+impl Stream {
+    /// Initialize a decoder which will choose a stream/lzma formats depending
+    /// on the input stream.
+    #[inline]
+    pub fn new_auto_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
+        let mut init = unsafe { Self::zeroed() };
+        cvt(unsafe { liblzma_sys::lzma_auto_decoder(&mut init.raw, memlimit, flags) })?;
+        Ok(init)
+    }
+
     /// Initialize a .xz stream decoder.
     ///
     /// The maximum memory usage can be specified along with flags such as
-    /// `TELL_ANY_CHECK`, `TELL_NO_CHECK`, `TELL_UNSUPPORTED_CHECK`,
-    /// `TELL_IGNORE_CHECK`, or `CONCATENATED`.
+    /// [`TELL_ANY_CHECK`], [`TELL_NO_CHECK`], [`TELL_UNSUPPORTED_CHECK`],
+    /// [`IGNORE_CHECK`], or [`CONCATENATED`].
     #[inline]
     pub fn new_stream_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
@@ -346,15 +353,6 @@ impl Stream {
     pub fn new_lzma_decoder(memlimit: u64) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
         cvt(unsafe { liblzma_sys::lzma_alone_decoder(&mut init.raw, memlimit) })?;
-        Ok(init)
-    }
-
-    /// Initialize a decoder which will choose a stream/lzma formats depending
-    /// on the input stream.
-    #[inline]
-    pub fn new_auto_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
-        let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_auto_decoder(&mut init.raw, memlimit, flags) })?;
         Ok(init)
     }
 
@@ -373,20 +371,31 @@ impl Stream {
         cvt(unsafe { liblzma_sys::lzma_raw_decoder(&mut init.raw, filters.inner.as_ptr()) })?;
         Ok(init)
     }
+}
 
-    /// Initialize an encoder stream using a custom filter chain.
+/// Generic functions
+impl Stream {
     #[inline]
-    pub fn new_raw_encoder(filters: &Filters) -> Result<Stream, Error> {
-        let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_raw_encoder(&mut init.raw, filters.inner.as_ptr()) })?;
-        Ok(init)
+    unsafe fn zeroed() -> Self {
+        Self {
+            raw: unsafe { mem::zeroed() },
+        }
     }
 
     /// Processes some data from input into an output buffer.
     ///
     /// This will perform the appropriate encoding or decoding operation
-    /// depending on the kind of underlying stream. Documentation for the
-    /// various `action` arguments can be found on the respective variants.
+    /// depending on the kind of underlying stream. See [`Action`] for the
+    /// possible actions that can be taken.
+    ///
+    /// After the first use of [`Action::SyncFlush`], [`Action::FullFlush`],
+    /// [`Action::FullBarrier`], or [`Action::Finish`], the same [`Action`]
+    /// must be used until this returns [`Status::StreamEnd`]. Not doing so
+    /// will result in a [`Error::Program`].
+    ///
+    /// The amount of input must not be modified by the application until
+    /// this returns [`Status::StreamEnd`], otherwise [`Error::Program`] will
+    /// be returned.
     #[inline]
     pub fn process(
         &mut self,
@@ -402,11 +411,13 @@ impl Stream {
         unsafe { cvt(liblzma_sys::lzma_code(&mut self.raw, action)) }
     }
 
-    /// Performs the same data as `process`, but places output data in a `Vec`.
+    /// Performs the same data as [`Stream::process`], but places output data in a [`Vec`].
     ///
     /// This function will use the extra capacity of `output` as a destination
     /// for bytes to be placed. The length of `output` will automatically get
     /// updated after the operation has completed.
+    ///
+    /// See [`Stream::process`] for the other arguments.
     #[inline]
     pub fn process_vec(
         &mut self,
@@ -451,8 +462,8 @@ impl Stream {
 
     /// Set the current memory usage limit.
     ///
-    /// This can return `Error::MemLimit` if the new limit is too small or
-    /// `Error::Program` if this stream doesn't take a memory limit.
+    /// This can return [`Error::MemLimit`] if the new limit is too small or
+    /// [`Error::Program`] if this stream doesn't take a memory limit.
     #[inline]
     pub fn set_memlimit(&mut self, limit: u64) -> Result<(), Error> {
         cvt(unsafe { liblzma_sys::lzma_memlimit_set(&mut self.raw, limit) }).map(|_| ())
@@ -490,7 +501,7 @@ impl LzmaOptions {
     /// Dictionary size indicates how many bytes of the recently processed
     /// uncompressed data is kept in memory.
     ///
-    /// The minimum dictionary size is 4096 bytes and the default is 2^23, 8MB.
+    /// The minimum dictionary size is 4096 bytes and the default is 2^23 = 8MB.
     #[inline]
     pub fn dict_size(&mut self, size: u32) -> &mut LzmaOptions {
         self.raw.dict_size = size;
@@ -504,7 +515,7 @@ impl LzmaOptions {
     /// bits of the next literal.
     ///
     /// The maximum value to this is 4 and the default is 3. It is not currently
-    /// supported if this plus `literal_position_bits` is greater than 4.
+    /// supported if this plus [`LzmaOptions::literal_position_bits`] is greater than 4.
     #[inline]
     pub fn literal_context_bits(&mut self, bits: u32) -> &mut LzmaOptions {
         self.raw.lc = bits;
@@ -515,7 +526,7 @@ impl LzmaOptions {
     ///
     /// This affects what kind of alignment in the uncompressed data is assumed
     /// when encoding literals. A literal is a single 8-bit byte. See
-    /// `position_bits` for more information about alignment.
+    /// [`LzmaOptions::position_bits`] for more information about alignment.
     ///
     /// The default for this is 0.
     #[inline]
@@ -527,8 +538,8 @@ impl LzmaOptions {
     /// Configures the number of position bits.
     ///
     /// Position bits affects what kind of alignment in the uncompressed data is
-    /// assumed in general. The default of 2 means four-byte alignment (2^ pb
-    /// =2^2=4), which is often a good choice when there's no better guess.
+    /// assumed in general. The default of 2 means four-byte alignment (2^pb
+    /// = 2^2 = 4), which is often a good choice when there's no better guess.
     ///
     /// When the alignment is known, setting pb accordingly may reduce the file
     /// size a little. E.g. with text files having one-byte alignment (US-ASCII,
@@ -557,10 +568,10 @@ impl LzmaOptions {
     ///
     /// This determines how many bytes the encoder compares from the match
     /// candidates when looking for the best match. Once a match of at least
-    /// `nice_len` bytes long is found, the encoder stops looking for better
+    /// `len` bytes long is found, the encoder stops looking for better
     /// candidates and encodes the match. (Naturally, if the found match is
-    /// actually longer than `nice_len`, the actual length is encoded; it's not
-    /// truncated to `nice_len`.)
+    /// actually longer than `len`, the actual length is encoded; it's not
+    /// truncated to `len`.)
     ///
     /// Bigger values usually increase the compression ratio and compression
     /// time. For most files, 32 to 128 is a good value, which gives very good
@@ -587,7 +598,7 @@ impl LzmaOptions {
     /// binary tree in a loop, each iteration going one step deeper in the chain
     /// or tree. The searching stops if
     ///
-    ///  - a match of at least `nice_len` bytes long is found;
+    ///  - a match of at least [`LzmaOptions::nice_len`] bytes long is found;
     ///  - all match candidates from the hash chain or binary tree have
     ///    been checked; or
     ///  - maximum search depth is reached.
@@ -598,8 +609,9 @@ impl LzmaOptions {
     /// can reduce compression ratio.
     ///
     /// Setting depth to zero tells liblzma to use an automatic default value,
-    /// that depends on the selected match finder and nice_len.  The default is
-    /// in the range [4, 200] or so (it may vary between liblzma versions).
+    /// that depends on the selected match finder and [`LzmaOptions::nice_len`].
+    /// The default is in the range [4, 200] or so (it may vary between liblzma
+    /// versions).
     ///
     /// Using a bigger depth value than the default can increase compression
     /// ratio in some cases. There is no strict maximum value, but high values
@@ -677,10 +689,14 @@ impl Filters {
     /// Add an LZMA2 filter.
     ///
     /// Usually you want this instead of LZMA1. Compared to LZMA1, LZMA2 adds
-    /// support for `SyncFlush`, uncompressed chunks (smaller expansion when
+    /// support for [`Action::SyncFlush`], uncompressed chunks (smaller expansion when
     /// trying to compress uncompressible data), possibility to change
-    /// `literal_context_bits`/`literal_position_bits`/`position_bits` in the
+    /// [`literal_context_bits`]/[`literal_position_bits`]/[`position_bits`] in the
     /// middle of encoding, and some other internal improvements.
+    ///
+    /// [`literal_context_bits`]: LzmaOptions::literal_context_bits
+    /// [`literal_position_bits`]: LzmaOptions::literal_position_bits
+    /// [`position_bits`]: LzmaOptions::position_bits
     #[inline]
     pub fn lzma2(&mut self, opts: &LzmaOptions) -> &mut Filters {
         self.lzma_opts.push_back(opts.raw);
@@ -1078,7 +1094,7 @@ impl Filters {
         Ok(self)
     }
 
-    /// recommend a Block size for multithreaded encoding
+    /// Recommend a Block size for multithreaded encoding
     ///
     /// # Examples
     /// ```
@@ -1100,7 +1116,7 @@ impl Filters {
 
 #[cfg(feature = "parallel")]
 impl MtStreamBuilder {
-    /// Creates a new blank builder to create a multithreaded encoding `Stream`.
+    /// Creates a new blank builder to create a multithreaded encoding [`Stream`].
     #[inline]
     pub fn new() -> Self {
         let mut init = Self {
@@ -1121,8 +1137,8 @@ impl MtStreamBuilder {
     /// Configures the maximum uncompressed size of a block
     ///
     /// The encoder will start a new .xz block every `block_size` bytes.
-    /// Using `FullFlush` or `FullBarrier` with `process` the caller may tell
-    /// liblzma to start a new block earlier.
+    /// Using [`Action::FullFlush`] or [`Action::FullBarrier`] with
+    /// [`Stream::process`] the caller may tell liblzma to start a new block earlier.
     ///
     /// With LZMA2, a recommended block size is 2-4 times the LZMA2 dictionary
     /// size. With very small dictionaries, it is recommended to use at least 1
@@ -1145,25 +1161,25 @@ impl MtStreamBuilder {
         self
     }
 
-    /// Timeout to allow `process` to return early
+    /// Timeout to allow [`Stream::process`] to return early
     ///
     /// Multithreading can make liblzma to consume input and produce output in a
     /// very bursty way: it may first read a lot of input to fill internal
     /// buffers, then no input or output occurs for a while.
     ///
-    /// In single-threaded mode, `process` won't return until it has either
+    /// In single-threaded mode, [`Stream::process`] won't return until it has either
     /// consumed all the input or filled the output buffer. If this is done in
-    /// multithreaded mode, it may cause a call `process` to take even tens of
+    /// multithreaded mode, it may cause a call [`Stream::process`] to take even tens of
     /// seconds, which isn't acceptable in all applications.
     ///
-    /// To avoid very long blocking times in `process`, a timeout (in
+    /// To avoid very long blocking times in [`Stream::process`], a timeout (in
     /// milliseconds) may be set here. If `process would block longer than
     /// this number of milliseconds, it will return with `Ok`. Reasonable
     /// values are 100 ms or more. The xz command line tool uses 300 ms.
     ///
     /// If long blocking times are fine for you, set timeout to a special
     /// value of 0, which will disable the timeout mechanism and will make
-    /// `process` block until all the input is consumed or the output
+    /// [`Stream::process`] block until all the input is consumed or the output
     /// buffer has been filled.
     #[inline]
     pub fn timeout_ms(&mut self, timeout: u32) -> &mut Self {
@@ -1173,7 +1189,7 @@ impl MtStreamBuilder {
 
     /// Compression preset (level and possible flags)
     ///
-    /// The preset is set just like with `Stream::new_easy_encoder`. The preset
+    /// The preset is set just like with [`Stream::new_easy_encoder`]. The preset
     /// is ignored if filters below have been specified.
     #[inline]
     pub fn preset(&mut self, preset: u32) -> &mut Self {
