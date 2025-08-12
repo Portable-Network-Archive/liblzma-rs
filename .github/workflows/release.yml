@@ -14,7 +14,7 @@ jobs:
       upload_url: ${{ steps.release.outputs.upload_url }}
       version: ${{ env.VERSION }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - name: Get the release version from the tag
