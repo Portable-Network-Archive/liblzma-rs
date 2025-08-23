@@ -92,6 +92,9 @@ pub const LZMA_FILTER_RISCV: lzma_vli = 0x0B;
 pub const LZMA_FILTER_LZMA1: lzma_vli = 0x4000000000000001;
 pub const LZMA_FILTER_LZMA2: lzma_vli = 0x21;
 
+// Size of the LZMA/XZ stream header/footer in bytes.
+pub const LZMA_STREAM_HEADER_SIZE: u32 = 12;
+
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
@@ -214,6 +217,12 @@ pub struct lzma_stream_flags {
 pub struct lzma_options_bcj {
     pub start_offset: u32,
 }
+
+#[repr(C)]
+pub struct lzma_index_s {
+    _unused: [u8; 0],
+}
+pub type lzma_index = lzma_index_s;
 
 extern "C" {
     pub fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret;
@@ -343,6 +352,18 @@ extern "C" {
         a: *const lzma_stream_flags,
         b: *const lzma_stream_flags,
     ) -> lzma_ret;
+
+    // Index parsing and querying used by high-level helpers.
+    pub fn lzma_index_buffer_decode(
+        i: *mut *mut lzma_index,
+        memlimit: *mut u64,
+        allocator: *const lzma_allocator,
+        input: *const u8,
+        in_pos: *mut usize,
+        in_size: usize,
+    ) -> lzma_ret;
+    pub fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli;
+    pub fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
 
     pub fn lzma_version_number() -> u32;
     pub fn lzma_version_string() -> *const c_char;
