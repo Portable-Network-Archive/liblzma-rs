@@ -183,7 +183,7 @@ pub enum Error {
 
 /// Possible integrity checks that can be part of a .xz stream.
 #[allow(missing_docs)] // self-explanatory mostly
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Check {
     None = liblzma_sys::LZMA_CHECK_NONE as isize,
     Crc32 = liblzma_sys::LZMA_CHECK_CRC32 as isize,
