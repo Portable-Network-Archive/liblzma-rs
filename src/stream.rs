@@ -43,7 +43,7 @@ pub struct Filters {
 }
 
 /// The `action` argument for [`Stream::process`],
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Action {
     /// Continue processing
     ///
@@ -195,7 +195,7 @@ pub enum Check {
 ///
 /// This selects the function used to analyze the data produced by the match
 /// finder.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Mode {
     /// Fast compression.
     ///
@@ -223,7 +223,7 @@ pub enum Mode {
 /// The memory usage formulas are only rough estimates, which are closest to
 /// reality when dict_size is a power of two. The formulas are  more complex in
 /// reality, and can also change a little between liblzma versions.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum MatchFinder {
     /// Hash Chain with 2- and 3-byte hashing
     HashChain3 = liblzma_sys::LZMA_MF_HC3 as isize,
