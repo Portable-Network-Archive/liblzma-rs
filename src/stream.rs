@@ -421,7 +421,11 @@ impl Stream {
         unsafe { self.process_inner(input, output.as_mut_ptr(), output.len(), action) }
     }
 
-    /// Same as [`Self::process`] but accepts uninitialized buffer
+    /// Same as [`Self::process`] but accepts uninitialized buffer.
+    ///
+    /// To retrieve bytes written into the `output`, please call [`Self::total_out()`] before
+    /// and after the call to [`Self::process_uninit`] and the diff of `total_out` would be
+    /// the bytes written to the `output`.
     #[inline]
     pub fn process_uninit(
         &mut self,
