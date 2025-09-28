@@ -9,7 +9,6 @@ use std::error;
 use std::fmt;
 use std::io;
 use std::mem;
-use std::slice;
 
 /// Representation of an in-memory LZMA encoding or decoding stream.
 ///
@@ -382,6 +381,22 @@ impl Stream {
         }
     }
 
+    #[inline]
+    unsafe fn process_inner(
+        &mut self,
+        input: &[u8],
+        output_ptr: *mut u8,
+        output_len: usize,
+        action: Action,
+    ) -> Result<Status, Error> {
+        self.raw.next_in = input.as_ptr();
+        self.raw.avail_in = input.len();
+        self.raw.next_out = output_ptr;
+        self.raw.avail_out = output_len;
+        let action = action as liblzma_sys::lzma_action;
+        unsafe { cvt(liblzma_sys::lzma_code(&mut self.raw, action)) }
+    }
+
     /// Processes some data from input into an output buffer.
     ///
     /// This will perform the appropriate encoding or decoding operation
@@ -403,12 +418,22 @@ impl Stream {
         output: &mut [u8],
         action: Action,
     ) -> Result<Status, Error> {
-        self.raw.next_in = input.as_ptr();
-        self.raw.avail_in = input.len();
-        self.raw.next_out = output.as_mut_ptr();
-        self.raw.avail_out = output.len();
-        let action = action as liblzma_sys::lzma_action;
-        unsafe { cvt(liblzma_sys::lzma_code(&mut self.raw, action)) }
+        unsafe { self.process_inner(input, output.as_mut_ptr(), output.len(), action) }
+    }
+
+    /// Same as [`Self::process`] but accepts uninitialized buffer.
+    ///
+    /// To retrieve bytes written into the `output`, please call [`Self::total_out()`] before
+    /// and after the call to [`Self::process_uninit`] and the diff of `total_out` would be
+    /// the bytes written to the `output`.
+    #[inline]
+    pub fn process_uninit(
+        &mut self,
+        input: &[u8],
+        output: &mut [mem::MaybeUninit<u8>],
+        action: Action,
+    ) -> Result<Status, Error> {
+        unsafe { self.process_inner(input, output.as_mut_ptr() as *mut _, output.len(), action) }
     }
 
     /// Performs the same data as [`Stream::process`], but places output data in a [`Vec`].
@@ -425,16 +450,11 @@ impl Stream {
         output: &mut Vec<u8>,
         action: Action,
     ) -> Result<Status, Error> {
-        let cap = output.capacity();
         let len = output.len();
 
         unsafe {
             let before = self.total_out();
-            let ret = {
-                let ptr = output.as_mut_ptr().add(len);
-                let out = slice::from_raw_parts_mut(ptr, cap - len);
-                self.process(input, out, action)
-            };
+            let ret = self.process_uninit(input, output.spare_capacity_mut(), action);
             output.set_len((self.total_out() - before) as usize + len);
             ret
         }
