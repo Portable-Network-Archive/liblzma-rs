@@ -9,7 +9,6 @@ use std::error;
 use std::fmt;
 use std::io;
 use std::mem;
-use std::slice;
 
 /// Representation of an in-memory LZMA encoding or decoding stream.
 ///
@@ -432,7 +431,7 @@ impl Stream {
     ) -> Result<Status, Error> {
         unsafe { self.process_inner(input, output.as_mut_ptr() as *mut _, output.len(), action) }
     }
-    
+
     /// Performs the same data as [`Stream::process`], but places output data in a [`Vec`].
     ///
     /// This function will use the extra capacity of `output` as a destination
