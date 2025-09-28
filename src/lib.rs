@@ -49,7 +49,7 @@
 //! async-compression = { version = "0.4", features = ["lzma"] }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/liblzma/0.4.4")]
+#![doc(html_root_url = "https://docs.rs/liblzma/0.4.5")]
 #![deny(missing_docs)]
 
 use std::io::{self, prelude::*};
