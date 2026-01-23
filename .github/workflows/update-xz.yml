@@ -22,7 +22,7 @@ jobs:
         run: .github/scripts/update-xz.sh
       - name: Create pull request
         if: steps.update.outputs.updated == '1'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: ":arrow_up: Bump xz to ${{ steps.update.outputs.version }}"
           title: ":arrow_up: Bump xz to ${{ steps.update.outputs.version }}"
