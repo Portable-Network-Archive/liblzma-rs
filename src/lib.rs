@@ -97,7 +97,6 @@ pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Resu
 }
 
 /// Find the size in bytes of uncompressed data from xz file.
-#[cfg(feature = "bindgen")]
 pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
     use std::mem::MaybeUninit;
     let mut footer = [0u8; liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize];
@@ -197,7 +196,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "bindgen")]
     fn size() {
         quickcheck(test as fn(_) -> _);
 
