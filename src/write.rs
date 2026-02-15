@@ -33,6 +33,10 @@ pub struct XzDecoder<W: Write> {
 impl<W: Write> XzEncoder<W> {
     /// Create a new compression stream which will compress at the given level
     /// to write compress output to the give output stream.
+    ///
+    /// The `level` argument here is typically 0-9 with 6 being a good default.
+    /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+    /// [`crate::stream::PRESET_EXTREME`] (for example, `6 | crate::stream::PRESET_EXTREME`).
     #[inline]
     pub fn new(obj: W, level: u32) -> XzEncoder<W> {
         let stream = Stream::new_easy_encoder(level, Check::Crc64).unwrap();
@@ -40,6 +44,10 @@ impl<W: Write> XzEncoder<W> {
     }
     /// Create a new parallel compression stream which will compress at the given level
     /// to write compress output to the give output stream.
+    ///
+    /// The `level` argument here is typically 0-9 with 6 being a good default.
+    /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+    /// [`crate::stream::PRESET_EXTREME`] (for example, `6 | crate::stream::PRESET_EXTREME`).
     #[cfg(feature = "parallel")]
     pub fn new_parallel(obj: W, level: u32) -> XzEncoder<W> {
         let stream = MtStreamBuilder::new()
@@ -374,7 +382,7 @@ impl<W: Write> Drop for XzDecoder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::stream::LzmaOptions;
+    use crate::stream::{LzmaOptions, PRESET_EXTREME};
     use quickcheck::quickcheck;
     use std::iter::repeat;
     #[cfg(all(target_family = "wasm", target_os = "unknown"))]
@@ -400,6 +408,16 @@ mod tests {
         c.write(b"").unwrap();
         let data = c.finish().unwrap().finish().unwrap();
         assert_eq!(&data[..], b"");
+    }
+
+    #[test]
+    fn extreme_preset_round_trip() {
+        let d = XzDecoder::new(Vec::new());
+        let mut c = XzEncoder::new(d, 6 | PRESET_EXTREME);
+        let input = vec![11u8; 128 * 1024 + 1];
+        c.write_all(&input).unwrap();
+        let data = c.finish().unwrap().finish().unwrap();
+        assert_eq!(data, input);
     }
 
     #[test]

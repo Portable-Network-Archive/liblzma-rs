@@ -30,6 +30,8 @@ impl<R: BufRead> XzEncoder<R> {
     /// stream and emit the compressed stream.
     ///
     /// The `level` argument here is typically 0-9 with 6 being a good default.
+    /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+    /// [`crate::stream::PRESET_EXTREME`] (for example, `6 | crate::stream::PRESET_EXTREME`).
     #[inline]
     pub fn new(r: R, level: u32) -> XzEncoder<R> {
         let stream = Stream::new_easy_encoder(level, Check::Crc64).unwrap();
@@ -40,6 +42,8 @@ impl<R: BufRead> XzEncoder<R> {
     /// stream and emit the compressed stream.
     ///
     /// The `level` argument here is typically 0-9 with 6 being a good default.
+    /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+    /// [`crate::stream::PRESET_EXTREME`] (for example, `6 | crate::stream::PRESET_EXTREME`).
     #[cfg(feature = "parallel")]
     pub fn new_parallel(r: R, level: u32) -> XzEncoder<R> {
         let stream = MtStreamBuilder::new()
