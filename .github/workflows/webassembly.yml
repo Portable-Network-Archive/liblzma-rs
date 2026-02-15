@@ -29,6 +29,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: true
+      - name: Use msrv lockfile
+        run: |
+          cp Cargo.lock.msrv Cargo.lock
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           target: ${{ matrix.target }}
@@ -41,18 +44,18 @@ jobs:
       - if: ${{ startsWith(matrix.target, 'wasm32-wasi') }}
         name: Run test
         run: |
-          cargo test --target ${{ matrix.target }} --features wasm
+          cargo test --locked --target ${{ matrix.target }} --features wasm
       - if: ${{ endsWith(matrix.target, 'unknown') }}
         name: Run test
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
           cargo binstall -y --force wasm-bindgen-cli
-          cargo test --target ${{ matrix.target }} --features wasm --release
+          cargo test --locked --target ${{ matrix.target }} --features wasm --release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For ease GitHub API rate limits
       - name: Run test
         if: ${{ startsWith(matrix.target, 'wasm32-unknown-emscripten') }}
         run: |
-          cargo test --target ${{ matrix.target }} --features wasm -- --skip standard_files
+          cargo test --locked --target ${{ matrix.target }} --features wasm -- --skip standard_files
         env:
           RUSTFLAGS: "-C link-args=-sINITIAL_MEMORY=128MB"
