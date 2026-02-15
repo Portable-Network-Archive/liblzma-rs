@@ -258,13 +258,26 @@ pub const IGNORE_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
 /// multiple concatenated xz files.
 pub const CONCATENATED: u32 = liblzma_sys::LZMA_CONCATENATED;
 
+/// Default compression preset level.
+pub const PRESET_DEFAULT: u32 = liblzma_sys::LZMA_PRESET_DEFAULT;
+
+/// Mask for extracting the preset level bits from a preset value.
+pub const PRESET_LEVEL_MASK: u32 = liblzma_sys::LZMA_PRESET_LEVEL_MASK;
+
+/// Flag to request the slower "extreme" variant of a preset.
+///
+/// Combine this with a preset level using bitwise-OR.
+/// For example: `6 | PRESET_EXTREME`.
+pub const PRESET_EXTREME: u32 = liblzma_sys::LZMA_PRESET_EXTREME;
+
 /// Encoder-related functions
 impl Stream {
     /// Initialize .xz stream encoder using a preset number
     ///
     /// This is intended to be used by most for encoding data. The `preset`
-    /// argument is a number 0-9 indicating the compression level to use, and
-    /// normally 6 is a reasonable default.
+    /// argument is usually a level in the range 0-9 with 6 being a good
+    /// default. You may also bitwise-OR a level with [`PRESET_EXTREME`] to use
+    /// the slower extreme variant, for example `6 | PRESET_EXTREME`.
     ///
     /// The `check` argument is the integrity check to insert at the end of the
     /// stream. The default of `Crc64` is typically appropriate.
@@ -501,8 +514,9 @@ impl LzmaOptions {
 
     /// Creates a new blank set of options for encoding.
     ///
-    /// The `preset` argument is the compression level to use, typically in the
-    /// range of 0-9.
+    /// The `preset` argument is usually a level in the range 0-9. You may also
+    /// bitwise-OR a level with [`PRESET_EXTREME`] to use the slower extreme
+    /// variant, for example `6 | PRESET_EXTREME`.
     #[inline]
     pub fn new_preset(preset: u32) -> Result<LzmaOptions, Error> {
         unsafe {
@@ -1209,8 +1223,9 @@ impl MtStreamBuilder {
 
     /// Compression preset (level and possible flags)
     ///
-    /// The preset is set just like with [`Stream::new_easy_encoder`]. The preset
-    /// is ignored if filters below have been specified.
+    /// The preset is set just like with [`Stream::new_easy_encoder`], including
+    /// support for [`PRESET_EXTREME`]. The preset is ignored if filters below
+    /// have been specified.
     #[inline]
     pub fn preset(&mut self, preset: u32) -> &mut Self {
         self.raw.preset = preset;

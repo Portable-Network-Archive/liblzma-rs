@@ -23,6 +23,8 @@ impl<R: Read> XzEncoder<R> {
     /// to read compress output to the give output stream.
     ///
     /// The `level` argument here is typically 0-9 with 6 being a good default.
+    /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+    /// [`crate::stream::PRESET_EXTREME`] (for example, `6 | crate::stream::PRESET_EXTREME`).
     #[inline]
     pub fn new(r: R, level: u32) -> XzEncoder<R> {
         XzEncoder {
@@ -34,6 +36,8 @@ impl<R: Read> XzEncoder<R> {
     /// to read compress output to the give output stream.
     ///
     /// The `level` argument here is typically 0-9 with 6 being a good default.
+    /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+    /// [`crate::stream::PRESET_EXTREME`] (for example, `6 | crate::stream::PRESET_EXTREME`).
     #[cfg(feature = "parallel")]
     pub fn new_parallel(r: R, level: u32) -> XzEncoder<R> {
         XzEncoder {
@@ -222,7 +226,7 @@ impl<W: Write + Read> Write for XzDecoder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::stream::LzmaOptions;
+    use crate::stream::{LzmaOptions, PRESET_EXTREME};
     use quickcheck::quickcheck;
     use rand::{thread_rng, Rng};
     use std::iter;
@@ -313,6 +317,16 @@ mod tests {
     }
 
     #[test]
+    fn extreme_preset_round_trip() {
+        let m = vec![7u8; 128 * 1024 + 1];
+        let c = XzEncoder::new(&m[..], 6 | PRESET_EXTREME);
+        let mut d = XzDecoder::new(c);
+        let mut data = Vec::new();
+        d.read_to_end(&mut data).unwrap();
+        assert_eq!(data, m);
+    }
+
+    #[test]
     fn qc_lzma1() {
         quickcheck(test as fn(_) -> _);
         fn test(v: Vec<u8>) -> bool {
@@ -352,6 +366,17 @@ mod tests {
             r.read_to_end(&mut v2).unwrap();
             v == v2
         }
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn extreme_preset_round_trip_parallel() {
+        let m = vec![9u8; 128 * 1024 + 1];
+        let c = XzEncoder::new_parallel(&m[..], 6 | PRESET_EXTREME);
+        let mut d = XzDecoder::new(c);
+        let mut data = Vec::new();
+        d.read_to_end(&mut data).unwrap();
+        assert_eq!(data, m);
     }
 
     #[cfg(feature = "parallel")]

@@ -73,6 +73,9 @@ pub fn decode_all<R: Read>(source: R) -> io::Result<Vec<u8>> {
 /// Compress from the given source as if using a [read::XzEncoder].
 ///
 /// The input data must be in the xz format.
+/// The `level` argument is typically 0-9 with 6 being a good default.
+/// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+/// [`stream::PRESET_EXTREME`] (for example, `6 | stream::PRESET_EXTREME`).
 pub fn encode_all<R: Read>(source: R, level: u32) -> io::Result<Vec<u8>> {
     let mut vec = Vec::new();
     let mut r = read::XzEncoder::new(source, level);
@@ -83,6 +86,9 @@ pub fn encode_all<R: Read>(source: R, level: u32) -> io::Result<Vec<u8>> {
 /// Compress all data from the given source as if using a [read::XzEncoder].
 ///
 /// Compressed data will be appended to `destination`.
+/// The `level` argument is typically 0-9 with 6 being a good default.
+/// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
+/// [`stream::PRESET_EXTREME`] (for example, `6 | stream::PRESET_EXTREME`).
 pub fn copy_encode<R: Read, W: Write>(source: R, mut destination: W, level: u32) -> io::Result<()> {
     io::copy(&mut read::XzEncoder::new(source, level), &mut destination)?;
     Ok(())
