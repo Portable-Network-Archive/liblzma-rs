@@ -2,6 +2,11 @@ use std::env;
 
 fn main() {
     let mut cfg = ctest2::TestGenerator::new();
+    for (key, _) in env::vars() {
+        if let Some(feature) = key.strip_prefix("CARGO_FEATURE_") {
+            cfg.cfg("feature", Some(&feature.to_lowercase().replace('_', "-")));
+        }
+    }
     if let Ok(out) = env::var("DEP_LZMA_INCLUDE") {
         cfg.include(&out);
     }
