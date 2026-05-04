@@ -9,7 +9,10 @@ pub extern "C" fn rust_lzma_wasm_shim_malloc(size: usize) -> *mut c_void {
 #[no_mangle]
 pub extern "C" fn rust_lzma_wasm_shim_calloc(nmemb: usize, size: usize) -> *mut c_void {
     // note: calloc expects the allocation to be zeroed
-    wasm_shim_alloc::<true>(nmemb * size)
+    match nmemb.checked_mul(size) {
+        Some(size) => wasm_shim_alloc::<true>(size),
+        None => core::ptr::null_mut(),
+    }
 }
 
 #[no_mangle]
@@ -99,16 +102,23 @@ fn wasm_shim_alloc<const ZEROED: bool>(size: usize) -> *mut c_void {
     // so it's not stored, and usize-alignment is used
     // memory layout: [size] [allocation]
 
-    let full_alloc_size = size + USIZE_SIZE;
+    let Some(full_alloc_size) = size.checked_add(USIZE_SIZE) else {
+        return core::ptr::null_mut();
+    };
 
     unsafe {
-        let layout = Layout::from_size_align_unchecked(full_alloc_size, USIZE_ALIGN);
+        let Ok(layout) = Layout::from_size_align(full_alloc_size, USIZE_ALIGN) else {
+            return core::ptr::null_mut();
+        };
 
         let ptr = if ZEROED {
             alloc_zeroed(layout)
         } else {
             alloc(layout)
         };
+        if ptr.is_null() {
+            return core::ptr::null_mut();
+        }
 
         // SAFETY: ptr is usize-aligned and we've allocated sufficient memory
         ptr.cast::<usize>().write(full_alloc_size);
@@ -128,4 +138,34 @@ unsafe fn wasm_shim_free(ptr: *mut c_void) {
 
     let layout = Layout::from_size_align_unchecked(full_alloc_size, USIZE_ALIGN);
     dealloc(alloc_ptr.cast(), layout);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn calloc_overflow_returns_null() {
+        let ptr = rust_lzma_wasm_shim_calloc(usize::MAX / 2 + 1, 2);
+
+        assert!(ptr.is_null());
+    }
+
+    #[test]
+    fn malloc_header_overflow_returns_null() {
+        let ptr = rust_lzma_wasm_shim_malloc(usize::MAX);
+
+        assert!(ptr.is_null());
+    }
+
+    #[test]
+    fn calloc_zeroes_memory() {
+        let ptr = rust_lzma_wasm_shim_calloc(4, 2);
+        assert!(!ptr.is_null());
+
+        let bytes = unsafe { core::slice::from_raw_parts(ptr.cast::<u8>(), 8) };
+        assert_eq!(bytes, &[0; 8]);
+
+        unsafe { rust_lzma_wasm_shim_free(ptr) };
+    }
 }
