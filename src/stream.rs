@@ -9,6 +9,7 @@ use std::error;
 use std::fmt;
 use std::io;
 use std::mem;
+use std::sync::Arc;
 
 /// Representation of an in-memory LZMA encoding or decoding stream.
 ///
@@ -26,6 +27,34 @@ unsafe impl Sync for Stream {}
 /// This builder is consumed by a number of other methods.
 pub struct LzmaOptions {
     raw: liblzma_sys::lzma_options_lzma,
+    // Owns the buffer that `raw.preset_dict` points at. liblzma copies the
+    // preset dictionary into its own history buffer at stream initialization,
+    // but the pointer must stay valid until then. Keeping the buffer here ties
+    // its lifetime to the options (and, after a clone, to the `Filters` that
+    // owns the cloned options), so the raw pointer can never dangle.
+    preset_dict: Option<Arc<[u8]>>,
+}
+
+impl Clone for LzmaOptions {
+    #[inline]
+    fn clone(&self) -> Self {
+        // `raw` is a plain C struct, so a bitwise copy also copies the stale
+        // `preset_dict` pointer. Re-anchor it to the cloned (shared) buffer so
+        // the copy never points into a buffer it does not keep alive.
+        let mut raw = self.raw;
+        let preset_dict = self.preset_dict.clone();
+        match &preset_dict {
+            Some(dict) => {
+                raw.preset_dict = dict.as_ptr();
+                raw.preset_dict_size = dict.len() as u32;
+            }
+            None => {
+                raw.preset_dict = std::ptr::null();
+                raw.preset_dict_size = 0;
+            }
+        }
+        Self { raw, preset_dict }
+    }
 }
 
 /// Builder to create a multithreaded stream encoder.
@@ -38,7 +67,10 @@ pub struct MtStreamBuilder {
 /// A custom chain of filters to configure an encoding stream.
 pub struct Filters {
     inner: Vec<liblzma_sys::lzma_filter>,
-    lzma_opts: LinkedList<liblzma_sys::lzma_options_lzma>,
+    // Owns each `LzmaOptions` (not just the raw C struct) so that any preset
+    // dictionary buffer stays alive for as long as the filter chain, which the
+    // raw pointers in `inner` reference.
+    lzma_opts: LinkedList<LzmaOptions>,
 }
 
 /// The `action` argument for [`Stream::process`],
@@ -509,6 +541,7 @@ impl LzmaOptions {
     pub fn new() -> LzmaOptions {
         LzmaOptions {
             raw: unsafe { mem::zeroed() },
+            preset_dict: None,
         }
     }
 
@@ -528,6 +561,45 @@ impl LzmaOptions {
                 Ok(options)
             }
         }
+    }
+
+    /// Sets a preset dictionary used to initialize the LZ77 history window.
+    ///
+    /// A preset dictionary primes the encoder/decoder with known data before
+    /// processing begins. It is useful when compressing many similar,
+    /// relatively small chunks of data independently from each other. The
+    /// dictionary should contain typical strings that occur in the data being
+    /// compressed, with the most probable strings near the end. If the
+    /// dictionary is larger than [`LzmaOptions::dict_size`], only the last
+    /// `dict_size` bytes are used.
+    ///
+    /// The buffer is copied and kept alive internally, so the same options can
+    /// be reused freely.
+    ///
+    /// # Warning
+    ///
+    /// A preset dictionary works correctly only with raw encoding and decoding
+    /// ([`Stream::new_raw_encoder`] / [`Stream::new_raw_decoder`]). None of the
+    /// container formats supported by liblzma allow a preset dictionary when
+    /// decoding, so a `.xz` or `.lzma` stream created with one cannot be
+    /// decoded by the regular decoder functions. The exact same dictionary must
+    /// be supplied when decoding.
+    #[inline]
+    pub fn preset_dict(&mut self, dict: impl Into<Vec<u8>>) -> &mut LzmaOptions {
+        let dict: Arc<[u8]> = dict.into().into();
+        self.raw.preset_dict = dict.as_ptr();
+        self.raw.preset_dict_size = dict.len() as u32;
+        self.preset_dict = Some(dict);
+        self
+    }
+
+    /// Clears any previously configured preset dictionary.
+    #[inline]
+    pub fn clear_preset_dict(&mut self) -> &mut LzmaOptions {
+        self.preset_dict = None;
+        self.raw.preset_dict = std::ptr::null();
+        self.raw.preset_dict_size = 0;
+        self
     }
 
     /// Configures the dictionary size, in bytes
@@ -702,8 +774,8 @@ impl Filters {
     /// what you are doing.  LZMA2 is almost always a better choice.
     #[inline]
     pub fn lzma1(&mut self, opts: &LzmaOptions) -> &mut Filters {
-        self.lzma_opts.push_back(opts.raw);
-        let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
+        self.lzma_opts.push_back(opts.clone());
+        let ptr = &self.lzma_opts.back().unwrap().raw as *const _ as *mut _;
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_LZMA1,
             options: ptr,
@@ -733,8 +805,8 @@ impl Filters {
     /// [`position_bits`]: LzmaOptions::position_bits
     #[inline]
     pub fn lzma2(&mut self, opts: &LzmaOptions) -> &mut Filters {
-        self.lzma_opts.push_back(opts.raw);
-        let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
+        self.lzma_opts.push_back(opts.clone());
+        let ptr = &self.lzma_opts.back().unwrap().raw as *const _ as *mut _;
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_LZMA2,
             options: ptr,

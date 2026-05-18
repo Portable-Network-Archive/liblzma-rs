@@ -54,6 +54,71 @@ fn test_bad(data: &[u8]) {
     assert!(w.write_all(data).is_err() || w.finish().is_err());
 }
 
+fn raw_lzma2_filters(opts: &stream::LzmaOptions) -> stream::Filters {
+    let mut filters = stream::Filters::new();
+    filters.lzma2(opts);
+    filters
+}
+
+#[test]
+fn preset_dict_roundtrip() {
+    let dict = b"the quick brown fox jumps over the lazy dog. ".repeat(16);
+    let data = b"the quick brown fox jumps over the lazy dog and then runs away quickly";
+
+    // Encode with a preset dictionary. Drop `opts` before encoding to prove the
+    // dictionary buffer's lifetime is owned by `Filters`, not the borrowed opts.
+    let compressed = {
+        let mut opts = stream::LzmaOptions::new_preset(6).unwrap();
+        opts.preset_dict(dict.clone());
+        let filters = raw_lzma2_filters(&opts);
+        drop(opts);
+        let enc = stream::Stream::new_raw_encoder(&filters).unwrap();
+        let mut out = Vec::new();
+        read::XzEncoder::new_stream(&data[..], enc)
+            .read_to_end(&mut out)
+            .unwrap();
+        out
+    };
+
+    // Decode with the same preset dictionary -> original data.
+    let mut opts = stream::LzmaOptions::new_preset(6).unwrap();
+    opts.preset_dict(dict.clone());
+    let filters = raw_lzma2_filters(&opts);
+    let dec = stream::Stream::new_raw_decoder(&filters).unwrap();
+    let mut decoded = Vec::new();
+    read::XzDecoder::new_stream(&compressed[..], dec)
+        .read_to_end(&mut decoded)
+        .unwrap();
+    assert_eq!(decoded, data);
+}
+
+#[test]
+fn preset_dict_affects_output() {
+    let dict = b"the quick brown fox jumps over the lazy dog. ".repeat(16);
+    let data = b"the quick brown fox jumps over the lazy dog and then runs away quickly";
+
+    let mut opts = stream::LzmaOptions::new_preset(6).unwrap();
+    opts.preset_dict(dict.clone());
+    let filters = raw_lzma2_filters(&opts);
+    let enc = stream::Stream::new_raw_encoder(&filters).unwrap();
+    let mut compressed = Vec::new();
+    read::XzEncoder::new_stream(&data[..], enc)
+        .read_to_end(&mut compressed)
+        .unwrap();
+
+    // Decoding the same stream WITHOUT the preset dictionary must not yield the
+    // original data, proving the dictionary actually influenced encoding.
+    let opts_no_dict = stream::LzmaOptions::new_preset(6).unwrap();
+    let filters_no_dict = raw_lzma2_filters(&opts_no_dict);
+    let dec = stream::Stream::new_raw_decoder(&filters_no_dict).unwrap();
+    let mut decoded = Vec::new();
+    let result = read::XzDecoder::new_stream(&compressed[..], dec).read_to_end(&mut decoded);
+    assert!(
+        result.is_err() || decoded != data,
+        "decoding without the preset dictionary unexpectedly reproduced the data"
+    );
+}
+
 fn assert_send_sync<T: Send + Sync>() {}
 
 #[test]
