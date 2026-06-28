@@ -13,6 +13,11 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      random:
+        patterns:
+          - "rand"
+          - "getrandom"
   - package-ecosystem: "cargo"
     directory: "liblzma-sys"
     schedule:
