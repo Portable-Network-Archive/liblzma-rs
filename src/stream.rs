@@ -252,7 +252,7 @@ pub const TELL_UNSUPPORTED_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK
 
 /// A flag passed when initializing a decoder, causes the decoder to ignore any
 /// integrity checks listed.
-pub const IGNORE_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
+pub const IGNORE_CHECK: u32 = liblzma_sys::LZMA_IGNORE_CHECK;
 
 /// A flag passed when initializing a decoder, indicates that the stream may be
 /// multiple concatenated xz files.
