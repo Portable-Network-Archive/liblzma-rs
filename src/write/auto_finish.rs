@@ -69,7 +69,7 @@ impl<W: Write> AutoFinishXzEncoder<W> {
     /// (e.g. the number of bytes written to this stream.)
     #[inline]
     pub fn total_in(&self) -> u64 {
-        self.0.total_out()
+        self.0.total_in()
     }
 }
 
