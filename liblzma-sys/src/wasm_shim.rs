@@ -24,12 +24,12 @@ pub unsafe extern "C" fn rust_lzma_wasm_shim_free(ptr: *mut c_void) {
 }
 
 #[no_mangle]
-pub extern "C" fn rust_lzma_wasm_shim_memcmp(
+pub unsafe extern "C" fn rust_lzma_wasm_shim_memcmp(
     str1: *const c_void,
     str2: *const c_void,
     n: usize,
 ) -> i32 {
-    // Safety: function contracts requires str1 and str2 at least `n`-long.
+    // SAFETY: function contracts requires str1 and str2 at least `n`-long.
     unsafe {
         let str1: &[u8] = core::slice::from_raw_parts(str1 as *const u8, n);
         let str2: &[u8] = core::slice::from_raw_parts(str2 as *const u8, n);
