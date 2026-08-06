@@ -58,4 +58,9 @@ jobs:
         run: |
           cargo test --locked --target ${{ matrix.target }} --features wasm -- --skip standard_files
         env:
-          RUSTFLAGS: "-C link-args=-sINITIAL_MEMORY=128MB"
+          # emscripten 6.0.6 turned DEFAULT_TO_CXX off, so emcc no longer links
+          # libc++abi/libunwind. rustc links via emcc, and std/panic_unwind need
+          # them for __cpp_exception and _Unwind_*.
+          RUSTFLAGS: "-C link-arg=-sINITIAL_MEMORY=128MB -C link-arg=-sDEFAULT_TO_CXX=1"
+          # Doc-tests link through rustdoc, which does not read RUSTFLAGS.
+          RUSTDOCFLAGS: "-C link-arg=-sDEFAULT_TO_CXX=1"
