@@ -125,6 +125,7 @@ pub struct lzma_stream {
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct lzma_filter {
     pub id: lzma_vli,
     pub options: *mut c_void,
@@ -298,6 +299,7 @@ extern "C" {
         dest: *mut lzma_filter,
         allocator: *const lzma_allocator,
     ) -> lzma_ret;
+    pub fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
     pub fn lzma_raw_encoder_memusage(filters: *const lzma_filter) -> u64;
     pub fn lzma_raw_decoder_memusage(filters: *const lzma_filter) -> u64;
     pub fn lzma_raw_encoder(strm: *mut lzma_stream, filters: *const lzma_filter) -> lzma_ret;

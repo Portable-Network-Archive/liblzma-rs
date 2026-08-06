@@ -39,7 +39,16 @@ pub struct MtStreamBuilder {
 pub struct Filters {
     inner: Vec<liblzma_sys::lzma_filter>,
     lzma_opts: LinkedList<liblzma_sys::lzma_options_lzma>,
+    /// The entries of `inner` whose `options` liblzma allocated in
+    /// [`Filters::push_with_properties`]. Those live on the C heap rather than
+    /// in `lzma_opts`, so they have to be freed through liblzma on drop.
+    decoded_opts: Vec<liblzma_sys::lzma_filter>,
 }
+
+const FILTER_TERMINATOR: liblzma_sys::lzma_filter = liblzma_sys::lzma_filter {
+    id: liblzma_sys::LZMA_VLI_UNKNOWN,
+    options: std::ptr::null_mut(),
+};
 
 /// The `action` argument for [`Stream::process`],
 #[derive(Debug, Copy, Clone)]
@@ -684,11 +693,9 @@ impl Filters {
     #[inline]
     pub fn new() -> Filters {
         Filters {
-            inner: vec![liblzma_sys::lzma_filter {
-                id: liblzma_sys::LZMA_VLI_UNKNOWN,
-                options: std::ptr::null_mut(),
-            }],
+            inner: vec![FILTER_TERMINATOR],
             lzma_opts: LinkedList::new(),
+            decoded_opts: Vec::new(),
         }
     }
 
@@ -1123,6 +1130,11 @@ impl Filters {
                 properties.len(),
             )
         })?;
+        // Some filters decode to no options at all, e.g. a BCJ filter whose
+        // start offset is zero.
+        if !filter.options.is_null() {
+            self.decoded_opts.push(filter);
+        }
         let pos = self.inner.len() - 1;
         self.inner.insert(pos, filter);
         Ok(self)
@@ -1145,6 +1157,18 @@ impl Filters {
     #[inline]
     pub fn mt_block_size(&self) -> u64 {
         unsafe { liblzma_sys::lzma_mt_block_size(self.inner.as_ptr()) }
+    }
+}
+
+impl Drop for Filters {
+    fn drop(&mut self) {
+        // `lzma_filters_free` walks at most `LZMA_FILTERS_MAX` entries before
+        // giving up, and a chain built here has no such bound, so free the
+        // options one filter at a time.
+        for filter in &self.decoded_opts {
+            let mut chain = [*filter, FILTER_TERMINATOR];
+            unsafe { liblzma_sys::lzma_filters_free(chain.as_mut_ptr(), std::ptr::null()) };
+        }
     }
 }
 
