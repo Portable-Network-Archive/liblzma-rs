@@ -282,10 +282,7 @@ mod tests {
         }
 
         let mut d = XzDecoder::new(&result[..]);
-        let mut data = Vec::with_capacity(m.len());
-        unsafe {
-            data.set_len(m.len());
-        }
+        let mut data = vec![0u8; m.len()];
         assert_eq!(d.read(&mut data).unwrap(), m.len());
         assert_eq!(data, &m[..]);
     }
