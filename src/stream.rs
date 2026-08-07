@@ -39,6 +39,30 @@ pub struct MtStreamBuilder {
 pub struct Filters {
     inner: Vec<liblzma_sys::lzma_filter>,
     lzma_opts: LinkedList<liblzma_sys::lzma_options_lzma>,
+    decoded_opts: Vec<DecodedFilterOptions>,
+}
+
+struct DecodedFilterOptions {
+    id: liblzma_sys::lzma_vli,
+    options: *mut std::ffi::c_void,
+}
+
+const FILTER_TERMINATOR: liblzma_sys::lzma_filter = liblzma_sys::lzma_filter {
+    id: liblzma_sys::LZMA_VLI_UNKNOWN,
+    options: std::ptr::null_mut(),
+};
+
+impl Drop for DecodedFilterOptions {
+    fn drop(&mut self) {
+        let mut filters = [
+            liblzma_sys::lzma_filter {
+                id: self.id,
+                options: self.options,
+            },
+            FILTER_TERMINATOR,
+        ];
+        unsafe { liblzma_sys::lzma_filters_free(filters.as_mut_ptr(), std::ptr::null()) };
+    }
 }
 
 /// The `action` argument for [`Stream::process`],
@@ -684,11 +708,9 @@ impl Filters {
     #[inline]
     pub fn new() -> Filters {
         Filters {
-            inner: vec![liblzma_sys::lzma_filter {
-                id: liblzma_sys::LZMA_VLI_UNKNOWN,
-                options: std::ptr::null_mut(),
-            }],
+            inner: vec![FILTER_TERMINATOR],
             lzma_opts: LinkedList::new(),
+            decoded_opts: Vec::new(),
         }
     }
 
@@ -1124,6 +1146,12 @@ impl Filters {
             )
         })?;
         let pos = self.inner.len() - 1;
+        if !filter.options.is_null() {
+            self.decoded_opts.push(DecodedFilterOptions {
+                id: filter.id,
+                options: filter.options,
+            });
+        }
         self.inner.insert(pos, filter);
         Ok(self)
     }
