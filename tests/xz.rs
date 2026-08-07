@@ -64,3 +64,25 @@ fn impls_send_and_sync() {
     assert_send_sync::<write::XzEncoder<&mut [u8]>>();
     assert_send_sync::<write::XzDecoder<&mut [u8]>>();
 }
+
+#[test]
+fn mixed_filter_options_outlive_filters() {
+    let opts = stream::LzmaOptions::new_preset(6).unwrap();
+    let encoder = {
+        let mut filters = stream::Filters::new();
+        filters.delta_properties(&[0]).unwrap();
+        filters.lzma2(&opts);
+        stream::Stream::new_stream_encoder(&filters, stream::Check::Crc64).unwrap()
+    };
+
+    let input = b"mixed Rust-owned and liblzma-owned filter options";
+    let mut writer = write::XzEncoder::new_stream(Vec::new(), encoder);
+    writer.write_all(input).unwrap();
+    let compressed = writer.finish().unwrap();
+
+    let mut decoded = Vec::new();
+    read::XzDecoder::new(&compressed[..])
+        .read_to_end(&mut decoded)
+        .unwrap();
+    assert_eq!(decoded, input);
+}
