@@ -100,14 +100,14 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install --yes valgrind
-    - name: Check decoded filter option cleanup
+    - name: Check test suite for memory leaks
       env:
         CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: >-
           valgrind --leak-check=full --show-leak-kinds=definite
           --errors-for-leak-kinds=definite --error-exitcode=1
       run: |
         cargo test --target x86_64-unknown-linux-gnu --no-default-features --features static \
-          --test xz mixed_filter_options_outlive_filters -- --exact
+          --tests -- --test-threads=1
 
 
   rustfmt:
