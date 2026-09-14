@@ -26,7 +26,8 @@ jobs:
             rust: stable
             static: yes
           - os: windows-latest
-            rust: stable-i686-msvc
+            rust: stable-x86_64-msvc
+            target: i686-pc-windows-msvc
           - os: windows-latest
             rust: stable-x86_64-msvc
           - os: windows-latest
@@ -37,7 +38,8 @@ jobs:
             static: yes
             crt_static: yes
           - os: windows-latest
-            rust: stable-i686-gnu
+            rust: stable-x86_64-gnu
+            target: i686-pc-windows-gnu
           - os: windows-latest
             rust: stable-x86_64-gnu
     steps:
@@ -47,16 +49,24 @@ jobs:
     - name: Install Rust (rustup)
       run: rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
       shell: bash
+    - name: Install Rust target
+      if: matrix.target
+      run: rustup target add ${{ matrix.target }}
+      shell: bash
+    - name: Set Rust target
+      if: matrix.target
+      run: echo "CARGO_BUILD_TARGET=${{ matrix.target }}" >> "$GITHUB_ENV"
+      shell: bash
     - uses: Swatinem/rust-cache@v2
       with:
         cache-targets: "false"
     - name: Set crt-static
       if: matrix.crt_static == 'yes'
-      run: echo RUSTFLAGS=-Ctarget-feature=+crt-static >> $GITHUB_ENV
+      run: echo "RUSTFLAGS=-Ctarget-feature=+crt-static" >> "$GITHUB_ENV"
       shell: bash
     - name: Set static
       if: matrix.static == 'yes'
-      run: echo LZMA_API_STATIC=1 >> $GITHUB_ENV
+      run: echo "LZMA_API_STATIC=1" >> "$GITHUB_ENV"
       shell: bash
     - name: copy Cargo.lock for msrv check
       if: matrix.rust == '1.60'
