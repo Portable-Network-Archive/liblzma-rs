@@ -49,7 +49,7 @@ impl<R: BufRead> XzEncoder<R> {
         let stream = MtStreamBuilder::new()
             .preset(level)
             .check(Check::Crc64)
-            .threads(num_cpus::get() as u32)
+            .threads(std::thread::available_parallelism().map_or(1, |n| n.get()) as u32)
             .encoder()
             .unwrap();
         Self::new_stream(r, stream)
@@ -173,7 +173,7 @@ impl<R: BufRead> XzDecoder<R> {
     pub fn new_parallel(r: R) -> Self {
         let stream = MtStreamBuilder::new()
             .memlimit_stop(u64::MAX)
-            .threads(num_cpus::get() as u32)
+            .threads(std::thread::available_parallelism().map_or(1, |n| n.get()) as u32)
             .decoder()
             .unwrap();
         Self::new_stream(r, stream)
