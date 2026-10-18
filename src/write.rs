@@ -53,7 +53,7 @@ impl<W: Write> XzEncoder<W> {
         let stream = MtStreamBuilder::new()
             .preset(level)
             .check(Check::Crc64)
-            .threads(num_cpus::get() as u32)
+            .threads(std::thread::available_parallelism().map_or(1, |n| n.get()) as u32)
             .encoder()
             .unwrap();
         Self::new_stream(obj, stream)
@@ -216,7 +216,7 @@ impl<W: Write> XzDecoder<W> {
     pub fn new_parallel(obj: W) -> Self {
         let stream = MtStreamBuilder::new()
             .memlimit_stop(u64::MAX)
-            .threads(num_cpus::get() as u32)
+            .threads(std::thread::available_parallelism().map_or(1, |n| n.get()) as u32)
             .decoder()
             .unwrap();
         Self::new_stream(obj, stream)
