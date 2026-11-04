@@ -23,11 +23,11 @@ members = ["systest"]
 liblzma-sys = { path = "liblzma-sys", version = "0.4.8", default-features = false }
 
 [dev-dependencies]
-rand = "0.8.0"
+rand = "0.10.3"
 quickcheck = "1.0.1"
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-getrandom = { version = "0.2", features = ["js"] }
+getrandom = { version = "0.4", features = ["js"] }
 
 [target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dev-dependencies]
 wasm-bindgen-test = "0.3"
