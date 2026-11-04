@@ -7,7 +7,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-liblzma-sys = { path = "../liblzma-sys" }
+liblzma-sys = { path = "../liblzma-sys", default-features = false }
 libc = "0.2"
 
 [build-dependencies]

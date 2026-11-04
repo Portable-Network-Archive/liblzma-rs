@@ -1,4 +1,4 @@
-pub use crate::bindgen::*;
+pub use super::bindgen::*;
 
 // lzma_action
 pub const LZMA_RUN: lzma_action = lzma_action_LZMA_RUN;
