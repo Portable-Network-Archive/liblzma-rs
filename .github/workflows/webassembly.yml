@@ -15,12 +15,15 @@ jobs:
           - wasm32-unknown-emscripten
           - wasm32-unknown-unknown
           - wasm32-wasip1
+          - wasm32-wasip2
         include:
           - target: wasm32-unknown-emscripten
             container: emscripten/emsdk:latest
           - target: wasm32-unknown-unknown
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-22
           - target: wasm32-wasip1
+            container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-22
+          - target: wasm32-wasip2
             container: ghcr.io/portable-network-archive/wasi-sdk-gh-actions:wasi-sdk-22
 
     runs-on: ubuntu-latest
