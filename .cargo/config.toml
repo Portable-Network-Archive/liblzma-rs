@@ -4,6 +4,8 @@ runner = ["wasmtime", "--dir", "."]
 runner = ["wasmtime", "--dir", "."]
 [target."wasm32-wasip2"]
 runner = ["wasmtime", "--dir", "."]
+[target."wasm32-wasip3"]
+runner = ["wasmtime", "--dir", "."]
 [target.wasm32-unknown-emscripten]
 runner = "node"
 [target.wasm32-unknown-unknown]
